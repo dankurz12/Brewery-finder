@@ -17,7 +17,6 @@
       --shadow: 0 12px 30px rgba(0,0,0,.35);
       --accent: #4ea1ff;
       --good: #38d996;
-      --bad: #ff6b6b;
       --radius: 16px;
     }
 
@@ -31,7 +30,8 @@
       line-height: 1.35;
     }
 
-    header{
+    /* Only the tiny title bar stays pinned */
+    .topbar{
       position: sticky;
       top: 0;
       z-index: 10;
@@ -40,38 +40,31 @@
       border-bottom: 1px solid var(--border);
     }
 
-    .wrap{
+    .topbar-inner{
       max-width: 920px;
       margin: 0 auto;
-      padding: 14px 16px 22px;
-    }
-
-    .title{
+      padding: 12px 16px;
       display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
+      align-items:center;
+      justify-content: space-between;
+      gap: 12px;
     }
 
-    h1{
-      margin: 0;
-      font-size: 20px;
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight: 900;
       letter-spacing: .2px;
+      font-size: 16px;
+      white-space: nowrap;
     }
 
-    .subtitle{
-      margin: 6px 0 0;
-      font-size: 13px;
-      color: var(--muted);
-      max-width: 64ch;
-    }
-
-    .pill{
+    .smallpill{
       display:inline-flex;
       align-items:center;
       gap:8px;
-      padding: 8px 12px;
+      padding: 7px 10px;
       border-radius: 999px;
       border: 1px solid var(--border);
       background: rgba(255,255,255,.05);
@@ -80,18 +73,18 @@
       white-space: nowrap;
     }
 
-    .controls{
-      margin-top: 14px;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
+    main{
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 12px 16px 40px;
     }
 
-    .row{
+    .controls{
       display:flex;
       gap:10px;
       flex-wrap: wrap;
       align-items:center;
+      margin: 8px 0 12px;
     }
 
     button{
@@ -99,7 +92,7 @@
       border: 1px solid rgba(78,161,255,.45);
       background: linear-gradient(180deg, rgba(78,161,255,.95), rgba(78,161,255,.70));
       color: #051126;
-      font-weight: 800;
+      font-weight: 900;
       padding: 11px 14px;
       border-radius: 14px;
       font-size: 15px;
@@ -110,70 +103,25 @@
       opacity: .6;
       cursor: not-allowed;
     }
-    button:active{ transform: translateY(1px); }
 
     .secondary{
       border: 1px solid var(--border);
       background: rgba(255,255,255,.06);
       color: var(--text);
       box-shadow: none;
-      font-weight: 750;
-    }
-
-    input[type="text"]{
-      flex: 1 1 220px;
-      padding: 11px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.05);
-      color: var(--text);
-      outline: none;
-      font-size: 14px;
-    }
-    input::placeholder{ color: rgba(234,240,255,.55); }
-
-    .toggle{
-      display:flex;
-      gap:10px;
-      flex-wrap: wrap;
-      align-items:center;
-    }
-
-    label{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      font-size: 13px;
-      color: var(--muted);
-      user-select:none;
-    }
-
-    select{
-      padding: 10px 10px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.05);
-      color: var(--text);
-      font-size: 14px;
-      outline:none;
-    }
-
-    main{
-      max-width: 920px;
-      margin: 0 auto;
-      padding: 12px 16px 40px;
+      font-weight: 850;
     }
 
     .status{
-      margin: 12px 0 0;
+      margin: 10px 0 0;
       color: var(--muted);
       font-size: 13px;
     }
 
     .error{
-      margin-top: 12px;
+      margin-top: 10px;
       color: #ffd0d0;
-      font-weight: 800;
+      font-weight: 900;
       font-size: 14px;
     }
 
@@ -203,7 +151,7 @@
     .name{
       margin:0;
       font-size: 16px;
-      font-weight: 900;
+      font-weight: 950;
       letter-spacing: .1px;
     }
 
@@ -228,7 +176,7 @@
       background: rgba(56,217,150,.14);
       border-color: rgba(56,217,150,.25);
       color: #caffed;
-      font-weight: 800;
+      font-weight: 900;
     }
 
     .meta{
@@ -240,7 +188,7 @@
 
     .meta b{
       color: var(--text);
-      font-weight: 800;
+      font-weight: 900;
     }
 
     .links{
@@ -261,7 +209,7 @@
       background: rgba(255,255,255,.06);
       color: var(--text);
       text-decoration:none;
-      font-weight: 850;
+      font-weight: 900;
       font-size: 13px;
     }
 
@@ -271,16 +219,7 @@
       color: #dcebff;
     }
 
-    .hint{
-      margin-top: 10px;
-      font-size: 12px;
-      color: rgba(234,240,255,.55);
-    }
-
     @media (min-width: 820px){
-      .controls{
-        grid-template-columns: 1fr;
-      }
       .grid{
         grid-template-columns: 1fr 1fr;
       }
@@ -289,59 +228,25 @@
 </head>
 
 <body>
-  <header>
-    <div class="wrap">
-      <div class="title">
-        <div>
-          <h1>🍺 Brewery Finder</h1>
-          <p class="subtitle">
-            Uses your location → pulls up to 50 nearby breweries → computes distance locally → sorts nearest first → quick map + website links.
-          </p>
-        </div>
-        <div class="pill" id="locPill">Location: not set</div>
-      </div>
-
-      <div class="controls">
-        <div class="row">
-          <button id="locBtn" onclick="locateAndFetch()">Locate Me & Find Breweries</button>
-          <button class="secondary" onclick="refreshSameLocation()">Refresh</button>
-        </div>
-
-        <div class="row">
-          <input id="searchBox" type="text" placeholder="Search by name, city, type..." oninput="render()" />
-          <div class="toggle">
-            <label><input id="microToggle" type="checkbox" checked onchange="render()"> micro</label>
-            <label><input id="brewpubToggle" type="checkbox" checked onchange="render()"> brewpub</label>
-            <label><input id="otherToggle" type="checkbox" onchange="render()"> include other types</label>
-          </div>
-        </div>
-
-        <div class="row">
-          <label>
-            Show
-            <select id="showCount" onchange="render()">
-              <option value="10">10</option>
-              <option value="15" selected>15</option>
-              <option value="25">25</option>
-              <option value="50">50</option>
-            </select>
-            results
-          </label>
-
-          <div class="pill" id="countPill">Loaded: 0</div>
-        </div>
-
-        <div class="hint">
-          If you think you’re missing breweries: Open Brewery DB is a free community dataset, so coverage varies. This version fetches 50 and sorts locally to reduce “missing nearby” caused by small page sizes.
-        </div>
-      </div>
-
-      <div class="status" id="status"></div>
-      <div class="error" id="error"></div>
+  <!-- Pinned minimal header ONLY -->
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">🍺 Brewery Finder</div>
+      <div class="smallpill" id="locPill">Loc: not set</div>
     </div>
-  </header>
+  </div>
 
+  <!-- Everything below scrolls normally -->
   <main>
+    <div class="controls">
+      <button id="locBtn" onclick="locateAndFetch()">Locate Me & Find Breweries</button>
+      <button class="secondary" onclick="refreshSameLocation()">Refresh</button>
+      <div class="smallpill" id="countPill">Loaded: 0</div>
+    </div>
+
+    <div class="status" id="status"></div>
+    <div class="error" id="error"></div>
+
     <div class="grid" id="grid"></div>
   </main>
 
@@ -349,16 +254,14 @@
     // ====== State ======
     let userLat = null;
     let userLon = null;
-    let rawBreweries = [];     // fetched results
-    let enrichedBreweries = []; // with computed distance + normalized fields
+    let enrichedBreweries = [];
     let lastFetchAt = null;
 
     // ====== Helpers ======
     const toRad = (x) => x * Math.PI / 180;
 
-    // Haversine distance (miles)
     function distanceMiles(lat1, lon1, lat2, lon2) {
-      const R = 3958.8;
+      const R = 3958.8; // miles
       const dLat = toRad(lat2 - lat1);
       const dLon = toRad(lon2 - lon1);
 
@@ -386,6 +289,15 @@
       return `https://maps.apple.com/?ll=${lat},${lon}&q=${q}`;
     }
 
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
     function setStatus(msg) {
       document.getElementById("status").textContent = msg || "";
     }
@@ -397,19 +309,18 @@
     function setLocPill() {
       const pill = document.getElementById("locPill");
       if (userLat == null || userLon == null) {
-        pill.textContent = "Location: not set";
+        pill.textContent = "Loc: not set";
         return;
       }
-      pill.textContent = `Location: ${userLat.toFixed(4)}, ${userLon.toFixed(4)}`;
+      pill.textContent = `Loc: ${userLat.toFixed(3)}, ${userLon.toFixed(3)}`;
     }
 
     function setCountPill() {
       document.getElementById("countPill").textContent = `Loaded: ${enrichedBreweries.length}`;
     }
 
-    // ====== Core: Fetch breweries ======
+    // ====== Fetch + Enrich ======
     async function fetchBreweries(lat, lon) {
-      // Fetch up to 50 nearest (API sorts by distance for by_dist, but we re-sort locally)
       const perPage = 50;
       const url = `https://api.openbrewerydb.org/v1/breweries?by_dist=${lat},${lon}&per_page=${perPage}`;
 
@@ -422,83 +333,41 @@
       const data = await res.json();
       if (!Array.isArray(data)) throw new Error("Unexpected API response");
 
-      rawBreweries = data;
-
-      // Enrich: compute distance ourselves; normalize fields; filter out missing coords
-      enrichedBreweries = rawBreweries
+      enrichedBreweries = data
         .map(b => {
           const hasCoords = b.latitude && b.longitude;
           const lat2 = hasCoords ? Number(b.latitude) : null;
           const lon2 = hasCoords ? Number(b.longitude) : null;
-          const dist = (hasCoords && userLat != null && userLon != null)
-            ? distanceMiles(userLat, userLon, lat2, lon2)
-            : null;
+          const dist = (hasCoords) ? distanceMiles(lat, lon, lat2, lon2) : null;
 
           return {
             ...b,
             _lat: lat2,
             _lon: lon2,
             _dist: dist,
-            _type: (b.brewery_type || "unknown").toLowerCase(),
-            _search: `${(b.name||"")} ${(b.city||"")} ${(b.state_province||"")} ${(b.brewery_type||"")}`.toLowerCase()
+            _type: (b.brewery_type || "unknown").toLowerCase()
           };
         })
-        .filter(b => b._dist != null) // drop those without coordinates
-        .sort((a, b) => a._dist - b._dist);
+        .filter(b => b._dist != null)       // keep only those with coords
+        .sort((a, b) => a._dist - b._dist); // nearest first
 
       lastFetchAt = new Date();
-      setStatus(`Fetched ${rawBreweries.length} results. Showing those with coordinates (sorted by your distance).`);
       setCountPill();
+      setStatus(`Showing ${enrichedBreweries.length} breweries (sorted by distance). Last fetch: ${lastFetchAt.toLocaleTimeString()}`);
       render();
     }
 
-    // ====== Render ======
+    // ====== Render (no filters; show everything) ======
     function render() {
       const grid = document.getElementById("grid");
       grid.innerHTML = "";
 
       if (enrichedBreweries.length === 0) {
-        grid.innerHTML = `<div class="card">No results loaded yet. Tap <b>Locate Me & Find Breweries</b>.</div>`;
+        grid.innerHTML = `<div class="card">Tap <b>Locate Me & Find Breweries</b> to load nearby breweries.</div>`;
         return;
       }
 
-      const q = (document.getElementById("searchBox").value || "").trim().toLowerCase();
-
-      const showMicro = document.getElementById("microToggle").checked;
-      const showBrewpub = document.getElementById("brewpubToggle").checked;
-      const showOther = document.getElementById("otherToggle").checked;
-
-      const allowed = new Set();
-      if (showMicro) allowed.add("micro");
-      if (showBrewpub) allowed.add("brewpub");
-
-      const showN = Number(document.getElementById("showCount").value || 15);
-
-      const filtered = enrichedBreweries.filter(b => {
-        // Type filter
-        const isMicroOrBrewpub = (b._type === "micro" || b._type === "brewpub");
-        const typeOk = showOther ? true : (allowed.has(b._type));
-        // If neither micro nor brewpub toggled but include-other is off, typeOk will likely be false (intended).
-        // Search filter
-        const searchOk = q.length === 0 ? true : b._search.includes(q);
-        // Keep only those matching.
-        return typeOk && searchOk && (showOther ? true : isMicroOrBrewpub || allowed.has(b._type));
-      });
-
-      const toShow = filtered.slice(0, showN);
-
-      setCountPill();
-      setStatus(
-        `Matching: ${filtered.length} • Showing: ${toShow.length}` +
-        (lastFetchAt ? ` • Last fetch: ${lastFetchAt.toLocaleTimeString()}` : "")
-      );
-
-      if (toShow.length === 0) {
-        grid.innerHTML = `<div class="card">No matches. Try clearing search or enabling “include other types”.</div>`;
-        return;
-      }
-
-      for (const b of toShow) {
+      for (const b of enrichedBreweries) {
         const addressParts = [b.address_1, b.city, b.state_province].filter(Boolean);
         const address = addressParts.length ? addressParts.join(", ") : "Address not available";
 
@@ -537,16 +406,6 @@
       }
     }
 
-    // Basic HTML escaping for safe rendering
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
-
     // ====== Location ======
     async function locateAndFetch() {
       const btn = document.getElementById("locBtn");
@@ -580,7 +439,7 @@
         }
       }, (err) => {
         if (err.code === err.PERMISSION_DENIED) {
-          setError("Location permission denied. Enable location access for this site in iPad Settings → Safari → Location (or site settings), then try again.");
+          setError("Location permission denied. Enable location access for this site and try again.");
         } else if (err.code === err.TIMEOUT) {
           setError("Location timed out. Try again.");
         } else {
@@ -604,7 +463,7 @@
       }
     }
 
-    // Initial render placeholder
+    // Initial placeholder
     render();
   </script>
 </body>
