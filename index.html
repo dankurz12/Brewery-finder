@@ -8,107 +8,194 @@
   <style>
     :root{
       --bg: #0b1220;
-      --panel: #0f1b33;
-      --card: #111c36;
-      --text: #e8eefc;
-      --muted: #a9b7d6;
+      --bg2:#0c1630;
+      --card: rgba(255,255,255,.06);
+      --card2: rgba(255,255,255,.04);
+      --text: #eaf0ff;
+      --muted: rgba(234,240,255,.70);
+      --border: rgba(255,255,255,.12);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
       --accent: #4ea1ff;
-      --accent2: #38d996;
-      --border: rgba(255,255,255,.10);
-      --shadow: 0 10px 25px rgba(0,0,0,.35);
-      --radius: 14px;
+      --good: #38d996;
+      --bad: #ff6b6b;
+      --radius: 16px;
     }
 
-    * { box-sizing: border-box; }
+    *{ box-sizing: border-box; }
+
     body{
       margin:0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background: radial-gradient(1200px 600px at 10% 0%, #14264b 0%, var(--bg) 45%);
       color: var(--text);
+      background: radial-gradient(1200px 800px at 10% -10%, #1a3170 0%, var(--bg2) 35%, var(--bg) 70%);
       line-height: 1.35;
     }
 
     header{
-      padding: 18px 16px 10px;
       position: sticky;
       top: 0;
+      z-index: 10;
       backdrop-filter: blur(10px);
-      background: rgba(11,18,32,.75);
+      background: rgba(11,18,32,.72);
       border-bottom: 1px solid var(--border);
-      z-index: 5;
     }
 
     .wrap{
-      max-width: 860px;
+      max-width: 920px;
       margin: 0 auto;
-      padding: 14px 16px 34px;
+      padding: 14px 16px 22px;
+    }
+
+    .title{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
     }
 
     h1{
-      margin: 0 0 6px;
+      margin: 0;
       font-size: 20px;
       letter-spacing: .2px;
     }
 
-    .sub{
-      margin: 0;
-      color: var(--muted);
+    .subtitle{
+      margin: 6px 0 0;
       font-size: 13px;
+      color: var(--muted);
+      max-width: 64ch;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
     }
 
     .controls{
       margin-top: 14px;
-      display: flex;
+      display: grid;
+      grid-template-columns: 1fr;
       gap: 10px;
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
       flex-wrap: wrap;
-      align-items: center;
+      align-items:center;
     }
 
     button{
-      appearance: none;
-      border: 1px solid var(--border);
-      background: linear-gradient(180deg, rgba(78,161,255,.95), rgba(78,161,255,.75));
-      color: #061125;
-      font-weight: 700;
+      appearance:none;
+      border: 1px solid rgba(78,161,255,.45);
+      background: linear-gradient(180deg, rgba(78,161,255,.95), rgba(78,161,255,.70));
+      color: #051126;
+      font-weight: 800;
       padding: 11px 14px;
-      border-radius: 12px;
+      border-radius: 14px;
       font-size: 15px;
       cursor: pointer;
       box-shadow: var(--shadow);
     }
+    button:disabled{
+      opacity: .6;
+      cursor: not-allowed;
+    }
     button:active{ transform: translateY(1px); }
 
-    .pill{
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 12px;
+    .secondary{
       border: 1px solid var(--border);
-      background: rgba(255,255,255,.04);
-      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      box-shadow: none;
+      font-weight: 750;
+    }
+
+    input[type="text"]{
+      flex: 1 1 220px;
+      padding: 11px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      outline: none;
+      font-size: 14px;
+    }
+    input::placeholder{ color: rgba(234,240,255,.55); }
+
+    .toggle{
+      display:flex;
+      gap:10px;
+      flex-wrap: wrap;
+      align-items:center;
+    }
+
+    label{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size: 13px;
+      color: var(--muted);
+      user-select:none;
+    }
+
+    select{
+      padding: 10px 10px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      font-size: 14px;
+      outline:none;
+    }
+
+    main{
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 12px 16px 40px;
+    }
+
+    .status{
+      margin: 12px 0 0;
       color: var(--muted);
       font-size: 13px;
     }
 
+    .error{
+      margin-top: 12px;
+      color: #ffd0d0;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
     .grid{
-      margin-top: 16px;
+      margin-top: 14px;
       display: grid;
       grid-template-columns: 1fr;
       gap: 12px;
     }
 
     .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
       border: 1px solid var(--border);
       border-radius: var(--radius);
+      background: linear-gradient(180deg, var(--card), var(--card2));
       padding: 14px;
       box-shadow: var(--shadow);
     }
 
-    .toprow{
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
+    .top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
       gap: 10px;
       margin-bottom: 10px;
     }
@@ -116,14 +203,15 @@
     .name{
       margin:0;
       font-size: 16px;
-      font-weight: 800;
+      font-weight: 900;
+      letter-spacing: .1px;
     }
 
     .badges{
-      display: flex;
+      display:flex;
       gap: 8px;
       flex-wrap: wrap;
-      justify-content: flex-end;
+      justify-content:flex-end;
     }
 
     .badge{
@@ -136,63 +224,66 @@
       white-space: nowrap;
     }
 
-    .badge.distance{
-      background: rgba(56,217,150,.12);
-      color: #b9ffe6;
+    .badge.dist{
+      background: rgba(56,217,150,.14);
       border-color: rgba(56,217,150,.25);
+      color: #caffed;
+      font-weight: 800;
     }
 
     .meta{
-      display: grid;
+      display:grid;
       gap: 6px;
-      color: var(--muted);
       font-size: 13px;
+      color: var(--muted);
     }
 
     .meta b{
       color: var(--text);
-      font-weight: 700;
+      font-weight: 800;
     }
 
     .links{
       margin-top: 12px;
-      display: flex;
+      display:flex;
       gap: 10px;
       flex-wrap: wrap;
     }
 
     .linkbtn{
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
       gap: 8px;
       padding: 10px 12px;
-      border-radius: 12px;
+      border-radius: 14px;
       border: 1px solid var(--border);
-      background: rgba(255,255,255,.05);
+      background: rgba(255,255,255,.06);
       color: var(--text);
-      text-decoration: none;
-      font-weight: 700;
+      text-decoration:none;
+      font-weight: 850;
       font-size: 13px;
     }
-    .linkbtn.primary{
-      background: rgba(78,161,255,.15);
-      border-color: rgba(78,161,255,.35);
-      color: #dbeaff;
-    }
-    .linkbtn:hover{ filter: brightness(1.08); }
 
-    .error{
-      margin-top: 14px;
-      color: #ffb4b4;
-      font-weight: 700;
-      font-size: 14px;
+    .linkbtn.primary{
+      background: rgba(78,161,255,.16);
+      border-color: rgba(78,161,255,.40);
+      color: #dcebff;
     }
 
     .hint{
       margin-top: 10px;
-      color: var(--muted);
       font-size: 12px;
+      color: rgba(234,240,255,.55);
+    }
+
+    @media (min-width: 820px){
+      .controls{
+        grid-template-columns: 1fr;
+      }
+      .grid{
+        grid-template-columns: 1fr 1fr;
+      }
     }
   </style>
 </head>
@@ -200,157 +291,321 @@
 <body>
   <header>
     <div class="wrap">
-      <h1>🍺 Brewery Finder</h1>
-      <p class="sub">Uses your location to find nearby breweries, adds distance + quick links.</p>
+      <div class="title">
+        <div>
+          <h1>🍺 Brewery Finder</h1>
+          <p class="subtitle">
+            Uses your location → pulls up to 50 nearby breweries → computes distance locally → sorts nearest first → quick map + website links.
+          </p>
+        </div>
+        <div class="pill" id="locPill">Location: not set</div>
+      </div>
 
       <div class="controls">
-        <button id="btn" onclick="getBreweries()">Locate Me & Find Breweries</button>
-        <div class="pill" id="locpill">Location: not set</div>
+        <div class="row">
+          <button id="locBtn" onclick="locateAndFetch()">Locate Me & Find Breweries</button>
+          <button class="secondary" onclick="refreshSameLocation()">Refresh</button>
+        </div>
+
+        <div class="row">
+          <input id="searchBox" type="text" placeholder="Search by name, city, type..." oninput="render()" />
+          <div class="toggle">
+            <label><input id="microToggle" type="checkbox" checked onchange="render()"> micro</label>
+            <label><input id="brewpubToggle" type="checkbox" checked onchange="render()"> brewpub</label>
+            <label><input id="otherToggle" type="checkbox" onchange="render()"> include other types</label>
+          </div>
+        </div>
+
+        <div class="row">
+          <label>
+            Show
+            <select id="showCount" onchange="render()">
+              <option value="10">10</option>
+              <option value="15" selected>15</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+            results
+          </label>
+
+          <div class="pill" id="countPill">Loaded: 0</div>
+        </div>
+
+        <div class="hint">
+          If you think you’re missing breweries: Open Brewery DB is a free community dataset, so coverage varies. This version fetches 50 and sorts locally to reduce “missing nearby” caused by small page sizes.
+        </div>
       </div>
-      <div class="hint">Tip: If you don’t see results, make sure Safari location permissions are enabled for your GitHub Pages site.</div>
+
+      <div class="status" id="status"></div>
+      <div class="error" id="error"></div>
     </div>
   </header>
 
-  <main class="wrap">
-    <div id="grid" class="grid"></div>
-    <div id="error" class="error"></div>
+  <main>
+    <div class="grid" id="grid"></div>
   </main>
 
   <script>
-    // Haversine distance in miles
+    // ====== State ======
+    let userLat = null;
+    let userLon = null;
+    let rawBreweries = [];     // fetched results
+    let enrichedBreweries = []; // with computed distance + normalized fields
+    let lastFetchAt = null;
+
+    // ====== Helpers ======
+    const toRad = (x) => x * Math.PI / 180;
+
+    // Haversine distance (miles)
     function distanceMiles(lat1, lon1, lat2, lon2) {
-      const R = 3958.8; // Earth radius in miles
-      const toRad = (x) => x * Math.PI / 180;
+      const R = 3958.8;
       const dLat = toRad(lat2 - lat1);
       const dLon = toRad(lon2 - lon1);
 
       const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
         Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        Math.sin(dLon/2) * Math.sin(dLon/2);
 
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
       return R * c;
     }
 
-    function mapsLink(lat, lon, name) {
-      // Apple Maps tends to open nicely on iOS; Google Maps link works everywhere too.
-      // We'll provide Google Maps search by coordinates (fast + reliable).
+    function prettyType(t) {
+      if (!t) return "unknown";
+      return t.replaceAll("_", " ");
+    }
+
+    function mapsGoogle(lat, lon, name) {
       const q = encodeURIComponent(`${lat},${lon} (${name})`);
       return `https://www.google.com/maps/search/?api=1&query=${q}`;
     }
 
-    function prettyType(t) {
-      if (!t) return "N/A";
-      return t.replaceAll("_", " ");
+    function mapsApple(lat, lon, name) {
+      const q = encodeURIComponent(name);
+      return `https://maps.apple.com/?ll=${lat},${lon}&q=${q}`;
     }
 
-    async function getBreweries() {
-      const errorEl = document.getElementById("error");
-      const grid = document.getElementById("grid");
-      const locpill = document.getElementById("locpill");
-      const btn = document.getElementById("btn");
+    function setStatus(msg) {
+      document.getElementById("status").textContent = msg || "";
+    }
 
-      errorEl.textContent = "";
+    function setError(msg) {
+      document.getElementById("error").textContent = msg || "";
+    }
+
+    function setLocPill() {
+      const pill = document.getElementById("locPill");
+      if (userLat == null || userLon == null) {
+        pill.textContent = "Location: not set";
+        return;
+      }
+      pill.textContent = `Location: ${userLat.toFixed(4)}, ${userLon.toFixed(4)}`;
+    }
+
+    function setCountPill() {
+      document.getElementById("countPill").textContent = `Loaded: ${enrichedBreweries.length}`;
+    }
+
+    // ====== Core: Fetch breweries ======
+    async function fetchBreweries(lat, lon) {
+      // Fetch up to 50 nearest (API sorts by distance for by_dist, but we re-sort locally)
+      const perPage = 50;
+      const url = `https://api.openbrewerydb.org/v1/breweries?by_dist=${lat},${lon}&per_page=${perPage}`;
+
+      setStatus("Fetching breweries…");
+      setError("");
+
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("API request failed");
+
+      const data = await res.json();
+      if (!Array.isArray(data)) throw new Error("Unexpected API response");
+
+      rawBreweries = data;
+
+      // Enrich: compute distance ourselves; normalize fields; filter out missing coords
+      enrichedBreweries = rawBreweries
+        .map(b => {
+          const hasCoords = b.latitude && b.longitude;
+          const lat2 = hasCoords ? Number(b.latitude) : null;
+          const lon2 = hasCoords ? Number(b.longitude) : null;
+          const dist = (hasCoords && userLat != null && userLon != null)
+            ? distanceMiles(userLat, userLon, lat2, lon2)
+            : null;
+
+          return {
+            ...b,
+            _lat: lat2,
+            _lon: lon2,
+            _dist: dist,
+            _type: (b.brewery_type || "unknown").toLowerCase(),
+            _search: `${(b.name||"")} ${(b.city||"")} ${(b.state_province||"")} ${(b.brewery_type||"")}`.toLowerCase()
+          };
+        })
+        .filter(b => b._dist != null) // drop those without coordinates
+        .sort((a, b) => a._dist - b._dist);
+
+      lastFetchAt = new Date();
+      setStatus(`Fetched ${rawBreweries.length} results. Showing those with coordinates (sorted by your distance).`);
+      setCountPill();
+      render();
+    }
+
+    // ====== Render ======
+    function render() {
+      const grid = document.getElementById("grid");
       grid.innerHTML = "";
-      btn.textContent = "Locating…";
+
+      if (enrichedBreweries.length === 0) {
+        grid.innerHTML = `<div class="card">No results loaded yet. Tap <b>Locate Me & Find Breweries</b>.</div>`;
+        return;
+      }
+
+      const q = (document.getElementById("searchBox").value || "").trim().toLowerCase();
+
+      const showMicro = document.getElementById("microToggle").checked;
+      const showBrewpub = document.getElementById("brewpubToggle").checked;
+      const showOther = document.getElementById("otherToggle").checked;
+
+      const allowed = new Set();
+      if (showMicro) allowed.add("micro");
+      if (showBrewpub) allowed.add("brewpub");
+
+      const showN = Number(document.getElementById("showCount").value || 15);
+
+      const filtered = enrichedBreweries.filter(b => {
+        // Type filter
+        const isMicroOrBrewpub = (b._type === "micro" || b._type === "brewpub");
+        const typeOk = showOther ? true : (allowed.has(b._type));
+        // If neither micro nor brewpub toggled but include-other is off, typeOk will likely be false (intended).
+        // Search filter
+        const searchOk = q.length === 0 ? true : b._search.includes(q);
+        // Keep only those matching.
+        return typeOk && searchOk && (showOther ? true : isMicroOrBrewpub || allowed.has(b._type));
+      });
+
+      const toShow = filtered.slice(0, showN);
+
+      setCountPill();
+      setStatus(
+        `Matching: ${filtered.length} • Showing: ${toShow.length}` +
+        (lastFetchAt ? ` • Last fetch: ${lastFetchAt.toLocaleTimeString()}` : "")
+      );
+
+      if (toShow.length === 0) {
+        grid.innerHTML = `<div class="card">No matches. Try clearing search or enabling “include other types”.</div>`;
+        return;
+      }
+
+      for (const b of toShow) {
+        const addressParts = [b.address_1, b.city, b.state_province].filter(Boolean);
+        const address = addressParts.length ? addressParts.join(", ") : "Address not available";
+
+        const distTxt = `${b._dist.toFixed(1)} mi`;
+        const typeTxt = prettyType(b.brewery_type);
+        const website = b.website_url || null;
+
+        const g = mapsGoogle(b._lat, b._lon, b.name || "Brewery");
+        const a = mapsApple(b._lat, b._lon, b.name || "Brewery");
+
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <div class="top">
+            <div>
+              <h3 class="name">${escapeHtml(b.name || "Unknown brewery")}</h3>
+            </div>
+            <div class="badges">
+              <span class="badge dist">${distTxt}</span>
+              <span class="badge">${escapeHtml(typeTxt)}</span>
+            </div>
+          </div>
+
+          <div class="meta">
+            <div><b>Address:</b> ${escapeHtml(address)}</div>
+            ${b.phone ? `<div><b>Phone:</b> ${escapeHtml(b.phone)}</div>` : ``}
+          </div>
+
+          <div class="links">
+            <a class="linkbtn primary" href="${g}" target="_blank" rel="noopener noreferrer">Google Maps</a>
+            <a class="linkbtn" href="${a}" target="_blank" rel="noopener noreferrer">Apple Maps</a>
+            ${website ? `<a class="linkbtn" href="${website}" target="_blank" rel="noopener noreferrer">Website / Tap List</a>` : ``}
+          </div>
+        `;
+        grid.appendChild(card);
+      }
+    }
+
+    // Basic HTML escaping for safe rendering
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    // ====== Location ======
+    async function locateAndFetch() {
+      const btn = document.getElementById("locBtn");
       btn.disabled = true;
+      btn.textContent = "Locating…";
+      setError("");
+      setStatus("");
 
       if (!navigator.geolocation) {
-        errorEl.textContent = "Geolocation isn’t supported in this browser.";
-        btn.textContent = "Locate Me & Find Breweries";
+        setError("Geolocation isn’t supported in this browser.");
         btn.disabled = false;
+        btn.textContent = "Locate Me & Find Breweries";
         return;
       }
 
       navigator.geolocation.getCurrentPosition(async (pos) => {
-        const lat = pos.coords.latitude;
-        const lon = pos.coords.longitude;
+        userLat = pos.coords.latitude;
+        userLon = pos.coords.longitude;
+        setLocPill();
 
-        locpill.textContent = `Location: ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+        btn.textContent = "Loading…";
 
         try {
-          // Grab a few extra then filter/sort by distance ourselves
-          const url = `https://api.openbrewerydb.org/v1/breweries?by_dist=${lat},${lon}&per_page=20`;
-          const res = await fetch(url);
-
-          if (!res.ok) throw new Error("API request failed");
-
-          let breweries = await res.json();
-          if (!Array.isArray(breweries) || breweries.length === 0) {
-            grid.innerHTML = "<div class='card'>No breweries found near you.</div>";
-            return;
-          }
-
-          // Enrich with distance (some entries may not have coords)
-          breweries = breweries
-            .map(b => {
-              const hasCoords = b.latitude && b.longitude;
-              const dist = hasCoords ? distanceMiles(lat, lon, Number(b.latitude), Number(b.longitude)) : null;
-              return { ...b, _dist: dist };
-            })
-            .filter(b => b._dist !== null)           // keep ones with coords
-            .sort((a, b) => a._dist - b._dist)       // nearest first
-            .slice(0, 10);
-
-          breweries.forEach(b => {
-            const distTxt = `${b._dist.toFixed(1)} mi`;
-
-            const addressParts = [b.address_1, b.city, b.state_province].filter(Boolean);
-            const address = addressParts.length ? addressParts.join(", ") : "Address not available";
-
-            const card = document.createElement("div");
-            card.className = "card";
-
-            const website = b.website_url ? b.website_url : null;
-            const gmaps = mapsLink(b.latitude, b.longitude, b.name);
-
-            card.innerHTML = `
-              <div class="toprow">
-                <div>
-                  <h3 class="name">${b.name}</h3>
-                </div>
-                <div class="badges">
-                  <span class="badge distance">${distTxt}</span>
-                  <span class="badge">${prettyType(b.brewery_type)}</span>
-                </div>
-              </div>
-
-              <div class="meta">
-                <div><b>Address:</b> ${address}</div>
-                ${b.phone ? `<div><b>Phone:</b> ${b.phone}</div>` : ``}
-              </div>
-
-              <div class="links">
-                <a class="linkbtn primary" href="${gmaps}" target="_blank" rel="noopener noreferrer">
-                  Open in Google Maps
-                </a>
-                ${website ? `
-                  <a class="linkbtn" href="${website}" target="_blank" rel="noopener noreferrer">
-                    Website / Tap List
-                  </a>` : ``}
-              </div>
-            `;
-
-            grid.appendChild(card);
-          });
-
+          await fetchBreweries(userLat, userLon);
         } catch (e) {
-          errorEl.textContent = "Couldn’t load breweries right now. Try again in a minute.";
+          setError("Couldn’t fetch breweries right now. Try again in a minute.");
+          setStatus("");
         } finally {
-          btn.textContent = "Locate Me & Find Breweries";
           btn.disabled = false;
+          btn.textContent = "Locate Me & Find Breweries";
         }
       }, (err) => {
         if (err.code === err.PERMISSION_DENIED) {
-          errorEl.textContent = "Location permission denied. Enable Location Services for Safari (or allow it for this site) and try again.";
+          setError("Location permission denied. Enable location access for this site in iPad Settings → Safari → Location (or site settings), then try again.");
+        } else if (err.code === err.TIMEOUT) {
+          setError("Location timed out. Try again.");
         } else {
-          errorEl.textContent = "Couldn’t get your location. Try again.";
+          setError("Couldn’t get your location. Try again.");
         }
-        btn.textContent = "Locate Me & Find Breweries";
         btn.disabled = false;
+        btn.textContent = "Locate Me & Find Breweries";
       }, { enableHighAccuracy: true, timeout: 12000 });
     }
+
+    async function refreshSameLocation() {
+      setError("");
+      if (userLat == null || userLon == null) {
+        setError("No location yet. Tap “Locate Me & Find Breweries” first.");
+        return;
+      }
+      try {
+        await fetchBreweries(userLat, userLon);
+      } catch (e) {
+        setError("Couldn’t refresh right now. Try again in a minute.");
+      }
+    }
+
+    // Initial render placeholder
+    render();
   </script>
 </body>
 </html>
