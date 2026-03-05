@@ -1,470 +1,352 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Brewery Finder</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brewery Finder</title>
 
-  <style>
-    :root{
-      --bg: #0b1220;
-      --bg2:#0c1630;
-      --card: rgba(255,255,255,.06);
-      --card2: rgba(255,255,255,.04);
-      --text: #eaf0ff;
-      --muted: rgba(234,240,255,.70);
-      --border: rgba(255,255,255,.12);
-      --shadow: 0 12px 30px rgba(0,0,0,.35);
-      --accent: #4ea1ff;
-      --good: #38d996;
-      --radius: 16px;
-    }
+<style>
+:root{
+--bg:#0b1220;
+--bg2:#0c1630;
+--card:rgba(255,255,255,.06);
+--text:#eaf0ff;
+--muted:rgba(234,240,255,.70);
+--border:rgba(255,255,255,.12);
+--shadow:0 12px 30px rgba(0,0,0,.35);
+--radius:16px;
+}
 
-    *{ box-sizing: border-box; }
+*{box-sizing:border-box;}
 
-    body{
-      margin:0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      color: var(--text);
-      background: radial-gradient(1200px 800px at 10% -10%, #1a3170 0%, var(--bg2) 35%, var(--bg) 70%);
-      line-height: 1.35;
-    }
+body{
+margin:0;
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+color:var(--text);
+background:radial-gradient(1200px 800px at 10% -10%,#1a3170 0%,var(--bg2) 35%,var(--bg) 70%);
+}
 
-    /* Only the tiny title bar stays pinned */
-    .topbar{
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      backdrop-filter: blur(10px);
-      background: rgba(11,18,32,.72);
-      border-bottom: 1px solid var(--border);
-    }
+.topbar{
+position:sticky;
+top:0;
+z-index:10;
+backdrop-filter:blur(10px);
+background:rgba(11,18,32,.72);
+border-bottom:1px solid var(--border);
+}
 
-    .topbar-inner{
-      max-width: 920px;
-      margin: 0 auto;
-      padding: 12px 16px;
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      gap: 12px;
-    }
+.topbar-inner{
+max-width:900px;
+margin:auto;
+padding:12px 16px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
 
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-weight: 900;
-      letter-spacing: .2px;
-      font-size: 16px;
-      white-space: nowrap;
-    }
+.brand{
+font-weight:900;
+font-size:16px;
+}
 
-    .smallpill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.05);
-      color: var(--muted);
-      font-size: 12px;
-      white-space: nowrap;
-    }
+.smallpill{
+padding:6px 10px;
+border-radius:999px;
+border:1px solid var(--border);
+background:rgba(255,255,255,.05);
+color:var(--muted);
+font-size:12px;
+}
 
-    main{
-      max-width: 920px;
-      margin: 0 auto;
-      padding: 12px 16px 40px;
-    }
+main{
+max-width:900px;
+margin:auto;
+padding:14px 16px 40px;
+}
 
-    .controls{
-      display:flex;
-      gap:10px;
-      flex-wrap: wrap;
-      align-items:center;
-      margin: 8px 0 12px;
-    }
+.controls{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:10px;
+}
 
-    button{
-      appearance:none;
-      border: 1px solid rgba(78,161,255,.45);
-      background: linear-gradient(180deg, rgba(78,161,255,.95), rgba(78,161,255,.70));
-      color: #051126;
-      font-weight: 900;
-      padding: 11px 14px;
-      border-radius: 14px;
-      font-size: 15px;
-      cursor: pointer;
-      box-shadow: var(--shadow);
-    }
-    button:disabled{
-      opacity: .6;
-      cursor: not-allowed;
-    }
+button{
+border:1px solid rgba(78,161,255,.45);
+background:linear-gradient(180deg,rgba(78,161,255,.95),rgba(78,161,255,.7));
+color:#051126;
+font-weight:900;
+padding:10px 14px;
+border-radius:12px;
+cursor:pointer;
+}
 
-    .secondary{
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      box-shadow: none;
-      font-weight: 850;
-    }
+.secondary{
+background:rgba(255,255,255,.06);
+color:var(--text);
+border:1px solid var(--border);
+}
 
-    .status{
-      margin: 10px 0 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
+.grid{
+display:grid;
+grid-template-columns:1fr;
+gap:12px;
+}
 
-    .error{
-      margin-top: 10px;
-      color: #ffd0d0;
-      font-weight: 900;
-      font-size: 14px;
-    }
+.card{
+border:1px solid var(--border);
+border-radius:var(--radius);
+background:var(--card);
+padding:14px;
+box-shadow:var(--shadow);
+}
 
-    .grid{
-      margin-top: 14px;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
+.top{
+display:flex;
+justify-content:space-between;
+margin-bottom:8px;
+}
 
-    .card{
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: linear-gradient(180deg, var(--card), var(--card2));
-      padding: 14px;
-      box-shadow: var(--shadow);
-    }
+.name{
+font-weight:900;
+margin:0;
+}
 
-    .top{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
+.badge{
+font-size:12px;
+padding:5px 9px;
+border-radius:999px;
+border:1px solid var(--border);
+background:rgba(255,255,255,.06);
+color:var(--muted);
+}
 
-    .name{
-      margin:0;
-      font-size: 16px;
-      font-weight: 950;
-      letter-spacing: .1px;
-    }
+.badge.dist{
+background:rgba(56,217,150,.14);
+border-color:rgba(56,217,150,.25);
+color:#caffed;
+font-weight:900;
+}
 
-    .badges{
-      display:flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      justify-content:flex-end;
-    }
+.meta{
+font-size:13px;
+color:var(--muted);
+display:grid;
+gap:4px;
+}
 
-    .badge{
-      font-size: 12px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.06);
-      color: var(--muted);
-      white-space: nowrap;
-    }
+.links{
+margin-top:10px;
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+}
 
-    .badge.dist{
-      background: rgba(56,217,150,.14);
-      border-color: rgba(56,217,150,.25);
-      color: #caffed;
-      font-weight: 900;
-    }
+.linkbtn{
+padding:8px 10px;
+border-radius:10px;
+border:1px solid var(--border);
+background:rgba(255,255,255,.06);
+color:var(--text);
+text-decoration:none;
+font-size:13px;
+font-weight:800;
+}
 
-    .meta{
-      display:grid;
-      gap: 6px;
-      font-size: 13px;
-      color: var(--muted);
-    }
+.linkbtn.primary{
+background:rgba(78,161,255,.16);
+border-color:rgba(78,161,255,.40);
+color:#dcebff;
+}
 
-    .meta b{
-      color: var(--text);
-      font-weight: 900;
-    }
+.status{font-size:13px;color:var(--muted);margin-top:8px;}
+.error{color:#ffb0b0;font-weight:900;margin-top:8px;}
 
-    .links{
-      margin-top: 12px;
-      display:flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .linkbtn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap: 8px;
-      padding: 10px 12px;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      text-decoration:none;
-      font-weight: 900;
-      font-size: 13px;
-    }
-
-    .linkbtn.primary{
-      background: rgba(78,161,255,.16);
-      border-color: rgba(78,161,255,.40);
-      color: #dcebff;
-    }
-
-    @media (min-width: 820px){
-      .grid{
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-  </style>
+@media (min-width:800px){
+.grid{grid-template-columns:1fr 1fr;}
+}
+</style>
 </head>
 
 <body>
-  <!-- Pinned minimal header ONLY -->
-  <div class="topbar">
-    <div class="topbar-inner">
-      <div class="brand">🍺 Brewery Finder</div>
-      <div class="smallpill" id="locPill">Loc: not set</div>
-    </div>
-  </div>
 
-  <!-- Everything below scrolls normally -->
-  <main>
-    <div class="controls">
-      <button id="locBtn" onclick="locateAndFetch()">Locate Me & Find Breweries</button>
-      <button class="secondary" onclick="refreshSameLocation()">Refresh</button>
-      <div class="smallpill" id="countPill">Loaded: 0</div>
-    </div>
+<div class="topbar">
+<div class="topbar-inner">
+<div class="brand">🍺 Brewery Finder</div>
+<div class="smallpill" id="locPill">Loc: not set</div>
+</div>
+</div>
 
-    <div class="status" id="status"></div>
-    <div class="error" id="error"></div>
+<main>
 
-    <div class="grid" id="grid"></div>
-  </main>
+<div class="controls">
+<button id="locBtn" onclick="locateAndFetch()">Locate Me</button>
+<button class="secondary" onclick="refreshSameLocation()">Refresh</button>
+<div class="smallpill" id="countPill">Loaded: 0</div>
+</div>
 
-  <script>
-    // ====== State ======
-    let userLat = null;
-    let userLon = null;
-    let enrichedBreweries = [];
-    let lastFetchAt = null;
+<div class="status" id="status"></div>
+<div class="error" id="error"></div>
 
-    // ====== Helpers ======
-    const toRad = (x) => x * Math.PI / 180;
+<div class="grid" id="grid"></div>
 
-    function distanceMiles(lat1, lon1, lat2, lon2) {
-      const R = 3958.8; // miles
-      const dLat = toRad(lat2 - lat1);
-      const dLon = toRad(lon2 - lon1);
+</main>
 
-      const a =
-        Math.sin(dLat/2) * Math.sin(dLat/2) +
-        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-        Math.sin(dLon/2) * Math.sin(dLon/2);
+<script>
 
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
-    }
+let userLat=null;
+let userLon=null;
+let breweries=[];
 
-    function prettyType(t) {
-      if (!t) return "unknown";
-      return t.replaceAll("_", " ");
-    }
+function toRad(x){return x*Math.PI/180;}
 
-    function mapsGoogle(lat, lon, name) {
-      const q = encodeURIComponent(`${lat},${lon} (${name})`);
-      return `https://www.google.com/maps/search/?api=1&query=${q}`;
-    }
+function distanceMiles(lat1,lon1,lat2,lon2){
+const R=3958.8;
+const dLat=toRad(lat2-lat1);
+const dLon=toRad(lon2-lon1);
 
-    function mapsApple(lat, lon, name) {
-      const q = encodeURIComponent(name);
-      return `https://maps.apple.com/?ll=${lat},${lon}&q=${q}`;
-    }
+const a=
+Math.sin(dLat/2)*Math.sin(dLat/2)+
+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*
+Math.sin(dLon/2)*Math.sin(dLon/2);
 
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
+const c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+return R*c;
+}
 
-    function setStatus(msg) {
-      document.getElementById("status").textContent = msg || "";
-    }
+function mapsGoogle(lat,lon,name){
+const q=encodeURIComponent(`${lat},${lon} (${name})`);
+return `https://www.google.com/maps/search/?api=1&query=${q}`;
+}
 
-    function setError(msg) {
-      document.getElementById("error").textContent = msg || "";
-    }
+function mapsApple(lat,lon,name){
+const q=encodeURIComponent(name);
+return `https://maps.apple.com/?ll=${lat},${lon}&q=${q}`;
+}
 
-    function setLocPill() {
-      const pill = document.getElementById("locPill");
-      if (userLat == null || userLon == null) {
-        pill.textContent = "Loc: not set";
-        return;
-      }
-      pill.textContent = `Loc: ${userLat.toFixed(3)}, ${userLon.toFixed(3)}`;
-    }
+function untappdSearchLink(name){
+const q=encodeURIComponent(name||"");
+return `https://untappd.com/search?q=${q}`;
+}
 
-    function setCountPill() {
-      document.getElementById("countPill").textContent = `Loaded: ${enrichedBreweries.length}`;
-    }
+function setLocPill(){
+const p=document.getElementById("locPill");
+if(userLat==null){p.textContent="Loc: not set";return;}
+p.textContent=`Loc: ${userLat.toFixed(3)}, ${userLon.toFixed(3)}`;
+}
 
-    // ====== Fetch + Enrich ======
-    async function fetchBreweries(lat, lon) {
-      const perPage = 50;
-      const url = `https://api.openbrewerydb.org/v1/breweries?by_dist=${lat},${lon}&per_page=${perPage}`;
+function setCount(){
+document.getElementById("countPill").textContent=`Loaded: ${breweries.length}`;
+}
 
-      setStatus("Fetching breweries…");
-      setError("");
+async function fetchBreweries(lat,lon){
 
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("API request failed");
+const url=`https://api.openbrewerydb.org/v1/breweries?by_dist=${lat},${lon}&per_page=50`;
 
-      const data = await res.json();
-      if (!Array.isArray(data)) throw new Error("Unexpected API response");
+document.getElementById("status").textContent="Fetching breweries…";
 
-      enrichedBreweries = data
-        .map(b => {
-          const hasCoords = b.latitude && b.longitude;
-          const lat2 = hasCoords ? Number(b.latitude) : null;
-          const lon2 = hasCoords ? Number(b.longitude) : null;
-          const dist = (hasCoords) ? distanceMiles(lat, lon, lat2, lon2) : null;
+const res=await fetch(url);
+const data=await res.json();
 
-          return {
-            ...b,
-            _lat: lat2,
-            _lon: lon2,
-            _dist: dist,
-            _type: (b.brewery_type || "unknown").toLowerCase()
-          };
-        })
-        .filter(b => b._dist != null)       // keep only those with coords
-        .sort((a, b) => a._dist - b._dist); // nearest first
+breweries=data
+.map(b=>{
+if(!b.latitude||!b.longitude)return null;
 
-      lastFetchAt = new Date();
-      setCountPill();
-      setStatus(`Showing ${enrichedBreweries.length} breweries (sorted by distance). Last fetch: ${lastFetchAt.toLocaleTimeString()}`);
-      render();
-    }
+const dist=distanceMiles(lat,lon,Number(b.latitude),Number(b.longitude));
 
-    // ====== Render (no filters; show everything) ======
-    function render() {
-      const grid = document.getElementById("grid");
-      grid.innerHTML = "";
+return {...b,_dist:dist};
+})
+.filter(Boolean)
+.sort((a,b)=>a._dist-b._dist);
 
-      if (enrichedBreweries.length === 0) {
-        grid.innerHTML = `<div class="card">Tap <b>Locate Me & Find Breweries</b> to load nearby breweries.</div>`;
-        return;
-      }
+setCount();
 
-      for (const b of enrichedBreweries) {
-        const addressParts = [b.address_1, b.city, b.state_province].filter(Boolean);
-        const address = addressParts.length ? addressParts.join(", ") : "Address not available";
+document.getElementById("status").textContent=`Showing ${breweries.length} breweries nearby`;
 
-        const distTxt = `${b._dist.toFixed(1)} mi`;
-        const typeTxt = prettyType(b.brewery_type);
-        const website = b.website_url || null;
+render();
+}
 
-        const g = mapsGoogle(b._lat, b._lon, b.name || "Brewery");
-        const a = mapsApple(b._lat, b._lon, b.name || "Brewery");
+function render(){
 
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-          <div class="top">
-            <div>
-              <h3 class="name">${escapeHtml(b.name || "Unknown brewery")}</h3>
-            </div>
-            <div class="badges">
-              <span class="badge dist">${distTxt}</span>
-              <span class="badge">${escapeHtml(typeTxt)}</span>
-            </div>
-          </div>
+const grid=document.getElementById("grid");
+grid.innerHTML="";
 
-          <div class="meta">
-            <div><b>Address:</b> ${escapeHtml(address)}</div>
-            ${b.phone ? `<div><b>Phone:</b> ${escapeHtml(b.phone)}</div>` : ``}
-          </div>
+if(breweries.length===0){
+grid.innerHTML=`<div class="card">Tap Locate Me to load breweries</div>`;
+return;
+}
 
-          <div class="links">
-            <a class="linkbtn primary" href="${g}" target="_blank" rel="noopener noreferrer">Google Maps</a>
-            <a class="linkbtn" href="${a}" target="_blank" rel="noopener noreferrer">Apple Maps</a>
-            ${website ? `<a class="linkbtn" href="${website}" target="_blank" rel="noopener noreferrer">Website / Tap List</a>` : ``}
-          </div>
-        `;
-        grid.appendChild(card);
-      }
-    }
+breweries.forEach(b=>{
 
-    // ====== Location ======
-    async function locateAndFetch() {
-      const btn = document.getElementById("locBtn");
-      btn.disabled = true;
-      btn.textContent = "Locating…";
-      setError("");
-      setStatus("");
+const address=[b.address_1,b.city,b.state_province].filter(Boolean).join(", ");
 
-      if (!navigator.geolocation) {
-        setError("Geolocation isn’t supported in this browser.");
-        btn.disabled = false;
-        btn.textContent = "Locate Me & Find Breweries";
-        return;
-      }
+const g=mapsGoogle(b.latitude,b.longitude,b.name);
+const a=mapsApple(b.latitude,b.longitude,b.name);
+const u=untappdSearchLink(b.name);
 
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        userLat = pos.coords.latitude;
-        userLon = pos.coords.longitude;
-        setLocPill();
+const card=document.createElement("div");
+card.className="card";
 
-        btn.textContent = "Loading…";
+card.innerHTML=`
+<div class="top">
+<h3 class="name">${b.name}</h3>
+<span class="badge dist">${b._dist.toFixed(1)} mi</span>
+</div>
 
-        try {
-          await fetchBreweries(userLat, userLon);
-        } catch (e) {
-          setError("Couldn’t fetch breweries right now. Try again in a minute.");
-          setStatus("");
-        } finally {
-          btn.disabled = false;
-          btn.textContent = "Locate Me & Find Breweries";
-        }
-      }, (err) => {
-        if (err.code === err.PERMISSION_DENIED) {
-          setError("Location permission denied. Enable location access for this site and try again.");
-        } else if (err.code === err.TIMEOUT) {
-          setError("Location timed out. Try again.");
-        } else {
-          setError("Couldn’t get your location. Try again.");
-        }
-        btn.disabled = false;
-        btn.textContent = "Locate Me & Find Breweries";
-      }, { enableHighAccuracy: true, timeout: 12000 });
-    }
+<div class="meta">
+<div><b>Type:</b> ${b.brewery_type}</div>
+<div><b>Address:</b> ${address||"Unknown"}</div>
+</div>
 
-    async function refreshSameLocation() {
-      setError("");
-      if (userLat == null || userLon == null) {
-        setError("No location yet. Tap “Locate Me & Find Breweries” first.");
-        return;
-      }
-      try {
-        await fetchBreweries(userLat, userLon);
-      } catch (e) {
-        setError("Couldn’t refresh right now. Try again in a minute.");
-      }
-    }
+<div class="links">
+<a class="linkbtn primary" href="${g}" target="_blank">Google Maps</a>
+<a class="linkbtn" href="${a}" target="_blank">Apple Maps</a>
+<a class="linkbtn" href="${u}" target="_blank">🍺 Untappd</a>
+${b.website_url?`<a class="linkbtn" href="${b.website_url}" target="_blank">Website</a>`:""}
+</div>
+`;
 
-    // Initial placeholder
-    render();
-  </script>
+grid.appendChild(card);
+
+});
+
+}
+
+function locateAndFetch(){
+
+const btn=document.getElementById("locBtn");
+btn.disabled=true;
+btn.textContent="Locating…";
+
+navigator.geolocation.getCurrentPosition(async pos=>{
+
+userLat=pos.coords.latitude;
+userLon=pos.coords.longitude;
+
+setLocPill();
+
+btn.textContent="Loading…";
+
+await fetchBreweries(userLat,userLon);
+
+btn.disabled=false;
+btn.textContent="Locate Me";
+
+},()=>{
+document.getElementById("error").textContent="Location permission required.";
+btn.disabled=false;
+btn.textContent="Locate Me";
+});
+}
+
+async function refreshSameLocation(){
+if(userLat==null)return;
+await fetchBreweries(userLat,userLon);
+}
+
+render();
+
+</script>
+
 </body>
 </html>
