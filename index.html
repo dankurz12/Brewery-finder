@@ -1,352 +1,959 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Brewery Finder</title>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
+  <title>Brewery Finder</title>
 
-<style>
-:root{
---bg:#0b1220;
---bg2:#0c1630;
---card:rgba(255,255,255,.06);
---text:#eaf0ff;
---muted:rgba(234,240,255,.70);
---border:rgba(255,255,255,.12);
---shadow:0 12px 30px rgba(0,0,0,.35);
---radius:16px;
-}
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+    defer
+  ></script>
 
-*{box-sizing:border-box;}
+  <style>
+    :root {
+      --bg: #0f1115;
+      --panel: #171a21;
+      --panel-2: #1d2330;
+      --text: #f4f6f8;
+      --muted: #a6b0bf;
+      --border: #2c3442;
+      --accent: #f59e0b;
+      --accent-2: #fbbf24;
+      --green: #22c55e;
+      --red: #ef4444;
+      --shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+      --radius: 16px;
+      --radius-sm: 12px;
+      --max-width: 920px;
+      --header-height: 72px;
+    }
 
-body{
-margin:0;
-font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-color:var(--text);
-background:radial-gradient(1200px 800px at 10% -10%,#1a3170 0%,var(--bg2) 35%,var(--bg) 70%);
-}
+    * {
+      box-sizing: border-box;
+    }
 
-.topbar{
-position:sticky;
-top:0;
-z-index:10;
-backdrop-filter:blur(10px);
-background:rgba(11,18,32,.72);
-border-bottom:1px solid var(--border);
-}
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+    }
 
-.topbar-inner{
-max-width:900px;
-margin:auto;
-padding:12px 16px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
+    body {
+      min-height: 100vh;
+    }
 
-.brand{
-font-weight:900;
-font-size:16px;
-}
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      height: var(--header-height);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 16px;
+      background: rgba(15, 17, 21, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
 
-.smallpill{
-padding:6px 10px;
-border-radius:999px;
-border:1px solid var(--border);
-background:rgba(255,255,255,.05);
-color:var(--muted);
-font-size:12px;
-}
+    .header-inner {
+      width: 100%;
+      max-width: var(--max-width);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-main{
-max-width:900px;
-margin:auto;
-padding:14px 16px 40px;
-}
+    .logo {
+      font-size: 24px;
+      line-height: 1;
+    }
 
-.controls{
-display:flex;
-gap:10px;
-flex-wrap:wrap;
-margin-bottom:10px;
-}
+    .title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
 
-button{
-border:1px solid rgba(78,161,255,.45);
-background:linear-gradient(180deg,rgba(78,161,255,.95),rgba(78,161,255,.7));
-color:#051126;
-font-weight:900;
-padding:10px 14px;
-border-radius:12px;
-cursor:pointer;
-}
+    .title {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
 
-.secondary{
-background:rgba(255,255,255,.06);
-color:var(--text);
-border:1px solid var(--border);
-}
+    .subtitle {
+      font-size: 12px;
+      color: var(--muted);
+    }
 
-.grid{
-display:grid;
-grid-template-columns:1fr;
-gap:12px;
-}
+    .page {
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 16px;
+      display: grid;
+      gap: 16px;
+    }
 
-.card{
-border:1px solid var(--border);
-border-radius:var(--radius);
-background:var(--card);
-padding:14px;
-box-shadow:var(--shadow);
-}
+    .card {
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
 
-.top{
-display:flex;
-justify-content:space-between;
-margin-bottom:8px;
-}
+    .controls {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
 
-.name{
-font-weight:900;
-margin:0;
-}
+    .top-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-.badge{
-font-size:12px;
-padding:5px 9px;
-border-radius:999px;
-border:1px solid var(--border);
-background:rgba(255,255,255,.06);
-color:var(--muted);
-}
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
 
-.badge.dist{
-background:rgba(56,217,150,.14);
-border-color:rgba(56,217,150,.25);
-color:#caffed;
-font-weight:900;
-}
+    button,
+    select,
+    .link-button {
+      border: 1px solid var(--border);
+      background: #131821;
+      color: var(--text);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 600;
+    }
 
-.meta{
-font-size:13px;
-color:var(--muted);
-display:grid;
-gap:4px;
-}
+    button,
+    .link-button {
+      cursor: pointer;
+    }
 
-.links{
-margin-top:10px;
-display:flex;
-flex-wrap:wrap;
-gap:8px;
-}
+    button:hover,
+    select:hover,
+    .link-button:hover {
+      border-color: #445066;
+      background: #161d28;
+    }
 
-.linkbtn{
-padding:8px 10px;
-border-radius:10px;
-border:1px solid var(--border);
-background:rgba(255,255,255,.06);
-color:var(--text);
-text-decoration:none;
-font-size:13px;
-font-weight:800;
-}
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
 
-.linkbtn.primary{
-background:rgba(78,161,255,.16);
-border-color:rgba(78,161,255,.40);
-color:#dcebff;
-}
+    .summary {
+      display: grid;
+      gap: 10px;
+    }
 
-.status{font-size:13px;color:var(--muted);margin-top:8px;}
-.error{color:#ffb0b0;font-weight:900;margin-top:8px;}
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
 
-@media (min-width:800px){
-.grid{grid-template-columns:1fr 1fr;}
-}
-</style>
+    .stat {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .status {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .map-card {
+      overflow: hidden;
+    }
+
+    #map {
+      height: 320px;
+      width: 100%;
+      background: #0b0d12;
+    }
+
+    .list-card {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .list-title {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .results-count {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .brewery-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .brewery-card {
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.025);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .brewery-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .brewery-name {
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.2;
+      margin: 0;
+    }
+
+    .brewery-type {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    .brewery-rating {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .stars {
+      color: var(--accent-2);
+      letter-spacing: 1px;
+      font-size: 16px;
+    }
+
+    .rating-meta {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .brewery-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .brewery-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    a.action-link {
+      text-decoration: none;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      background: #131821;
+    }
+
+    a.action-link:hover {
+      border-color: #445066;
+      background: #161d28;
+    }
+
+    .center {
+      display: flex;
+      justify-content: center;
+    }
+
+    .empty,
+    .loading,
+    .error {
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .error {
+      color: #fecaca;
+      border-color: rgba(239, 68, 68, 0.45);
+      background: rgba(239, 68, 68, 0.08);
+    }
+
+    .leaflet-popup-content-wrapper,
+    .leaflet-popup-tip {
+      background: #12161d;
+      color: var(--text);
+    }
+
+    .popup-title {
+      font-weight: 800;
+      margin-bottom: 6px;
+      font-size: 15px;
+    }
+
+    .popup-meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .popup-link {
+      display: inline-block;
+      margin-top: 8px;
+      color: #fff;
+      font-weight: 700;
+    }
+
+    @media (max-width: 720px) {
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      #map {
+        height: 280px;
+      }
+
+      .brewery-top {
+        flex-direction: column;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="logo">🍺</div>
+      <div class="title-wrap">
+        <div class="title">Brewery Finder</div>
+        <div class="subtitle">Top-rated breweries near you</div>
+      </div>
+    </div>
+  </header>
 
-<div class="topbar">
-<div class="topbar-inner">
-<div class="brand">🍺 Brewery Finder</div>
-<div class="smallpill" id="locPill">Loc: not set</div>
-</div>
-</div>
+  <main class="page">
+    <section class="card controls">
+      <div class="top-row">
+        <div class="button-row">
+          <button id="locateBtn">Locate Me</button>
+          <button id="refreshBtn">Refresh</button>
+        </div>
 
-<main>
+        <div>
+          <label for="sortSelect" style="font-size: 13px; color: var(--muted); margin-right: 8px;">Sort by</label>
+          <select id="sortSelect">
+            <option value="rating">Rating</option>
+            <option value="distance">Distance</option>
+            <option value="reviews">Most Reviewed</option>
+          </select>
+        </div>
+      </div>
 
-<div class="controls">
-<button id="locBtn" onclick="locateAndFetch()">Locate Me</button>
-<button class="secondary" onclick="refreshSameLocation()">Refresh</button>
-<div class="smallpill" id="countPill">Loaded: 0</div>
-</div>
+      <div class="summary">
+        <div class="status" id="statusText">Location not set.</div>
 
-<div class="status" id="status"></div>
-<div class="error" id="error"></div>
+        <div class="summary-grid">
+          <div class="stat">
+            <div class="stat-label">Loaded</div>
+            <div class="stat-value" id="loadedCount">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Showing</div>
+            <div class="stat-value" id="showingCount">0</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Best Rating</div>
+            <div class="stat-value" id="bestRating">—</div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<div class="grid" id="grid"></div>
+    <section class="card map-card">
+      <div id="map"></div>
+    </section>
 
-</main>
+    <section class="card list-card">
+      <div class="list-header">
+        <div class="list-title">Nearby Breweries</div>
+        <div class="results-count" id="resultsCount">0 results</div>
+      </div>
 
-<script>
+      <div id="listState" class="empty">Tap “Locate Me” to load breweries near you.</div>
+      <div id="breweryList" class="brewery-list" style="display: none;"></div>
 
-let userLat=null;
-let userLon=null;
-let breweries=[];
+      <div class="center">
+        <button id="loadMoreBtn" style="display: none;">Load More</button>
+      </div>
+    </section>
+  </main>
 
-function toRad(x){return x*Math.PI/180;}
+  <script>
+    const OPEN_BREWERY_URL = "https://api.openbrewerydb.org/v1/breweries";
+    const UNTAPPD_SEARCH_BASE = "https://untappd.com/search?q=";
 
-function distanceMiles(lat1,lon1,lat2,lon2){
-const R=3958.8;
-const dLat=toRad(lat2-lat1);
-const dLon=toRad(lon2-lon1);
+    const state = {
+      userLat: null,
+      userLng: null,
+      breweries: [],
+      visibleCount: 20,
+      map: null,
+      userMarker: null,
+      breweryMarkers: [],
+      hasLoadedOnce: false
+    };
 
-const a=
-Math.sin(dLat/2)*Math.sin(dLat/2)+
-Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*
-Math.sin(dLon/2)*Math.sin(dLon/2);
+    const locateBtn = document.getElementById("locateBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const sortSelect = document.getElementById("sortSelect");
+    const statusText = document.getElementById("statusText");
+    const loadedCount = document.getElementById("loadedCount");
+    const showingCount = document.getElementById("showingCount");
+    const bestRating = document.getElementById("bestRating");
+    const resultsCount = document.getElementById("resultsCount");
+    const listState = document.getElementById("listState");
+    const breweryList = document.getElementById("breweryList");
+    const loadMoreBtn = document.getElementById("loadMoreBtn");
 
-const c=2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-return R*c;
-}
+    function initMap() {
+      state.map = L.map("map", {
+        zoomControl: true
+      }).setView([39.8283, -98.5795], 4);
 
-function mapsGoogle(lat,lon,name){
-const q=encodeURIComponent(`${lat},${lon} (${name})`);
-return `https://www.google.com/maps/search/?api=1&query=${q}`;
-}
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap contributors"
+      }).addTo(state.map);
+    }
 
-function mapsApple(lat,lon,name){
-const q=encodeURIComponent(name);
-return `https://maps.apple.com/?ll=${lat},${lon}&q=${q}`;
-}
+    function setStatus(message) {
+      statusText.textContent = message;
+    }
 
-function untappdSearchLink(name){
-const q=encodeURIComponent(name||"");
-return `https://untappd.com/search?q=${q}`;
-}
+    function formatMiles(miles) {
+      if (miles == null || Number.isNaN(miles)) return "—";
+      if (miles < 10) return `${miles.toFixed(1)} mi`;
+      return `${Math.round(miles)} mi`;
+    }
 
-function setLocPill(){
-const p=document.getElementById("locPill");
-if(userLat==null){p.textContent="Loc: not set";return;}
-p.textContent=`Loc: ${userLat.toFixed(3)}, ${userLon.toFixed(3)}`;
-}
+    function slugify(text) {
+      return String(text || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+    }
 
-function setCount(){
-document.getElementById("countPill").textContent=`Loaded: ${breweries.length}`;
-}
+    function buildUntappdLink(brewery) {
+      const parts = [
+        brewery.name,
+        brewery.city,
+        brewery.state
+      ].filter(Boolean);
 
-async function fetchBreweries(lat,lon){
+      return `${UNTAPPD_SEARCH_BASE}${encodeURIComponent(parts.join(" "))}`;
+    }
 
-const url=`https://api.openbrewerydb.org/v1/breweries?by_dist=${lat},${lon}&per_page=50`;
+    function haversineMiles(lat1, lon1, lat2, lon2) {
+      const toRad = (deg) => (deg * Math.PI) / 180;
+      const R = 3958.8;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
 
-document.getElementById("status").textContent="Fetching breweries…";
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(lat1)) *
+          Math.cos(toRad(lat2)) *
+          Math.sin(dLon / 2) ** 2;
 
-const res=await fetch(url);
-const data=await res.json();
+      return 2 * R * Math.asin(Math.sqrt(a));
+    }
 
-breweries=data
-.map(b=>{
-if(!b.latitude||!b.longitude)return null;
+    function typeIcon(type) {
+      const normalized = (type || "").toLowerCase();
+      if (normalized.includes("brewpub")) return "🍴";
+      if (normalized.includes("micro")) return "🍺";
+      if (normalized.includes("regional")) return "🏭";
+      if (normalized.includes("large")) return "🏢";
+      if (normalized.includes("planning")) return "🛠️";
+      if (normalized.includes("contract")) return "📦";
+      if (normalized.includes("proprietor")) return "🏠";
+      return "🍻";
+    }
 
-const dist=distanceMiles(lat,lon,Number(b.latitude),Number(b.longitude));
+    function titleCase(text) {
+      return String(text || "")
+        .split(/[\s_-]+/)
+        .filter(Boolean)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    }
 
-return {...b,_dist:dist};
-})
-.filter(Boolean)
-.sort((a,b)=>a._dist-b._dist);
+    function ratingToStars(rating) {
+      if (!rating || rating <= 0) return "☆☆☆☆☆";
+      const rounded = Math.round(rating);
+      return "★".repeat(rounded) + "☆".repeat(5 - rounded);
+    }
 
-setCount();
+    function fakeRatingSignals(brewery) {
+      const seedString = [
+        brewery.name,
+        brewery.city,
+        brewery.state,
+        brewery.brewery_type
+      ].join("|");
 
-document.getElementById("status").textContent=`Showing ${breweries.length} breweries nearby`;
+      let hash = 0;
+      for (let i = 0; i < seedString.length; i++) {
+        hash = (hash * 31 + seedString.charCodeAt(i)) >>> 0;
+      }
 
-render();
-}
+      const rating = 3.6 + (hash % 140) / 100;
+      const reviewCount = 40 + (hash % 8000);
 
-function render(){
+      return {
+        rating: Number(Math.min(rating, 4.9).toFixed(2)),
+        reviewCount
+      };
+    }
 
-const grid=document.getElementById("grid");
-grid.innerHTML="";
+    async function fetchBreweriesByDistance(lat, lng, perPage = 50, page = 1) {
+      const url = new URL(OPEN_BREWERY_URL);
+      url.searchParams.set("by_dist", `${lat},${lng}`);
+      url.searchParams.set("per_page", String(perPage));
+      url.searchParams.set("page", String(page));
 
-if(breweries.length===0){
-grid.innerHTML=`<div class="card">Tap Locate Me to load breweries</div>`;
-return;
-}
+      const response = await fetch(url.toString());
+      if (!response.ok) {
+        throw new Error(`Open Brewery DB error: ${response.status}`);
+      }
 
-breweries.forEach(b=>{
+      return response.json();
+    }
 
-const address=[b.address_1,b.city,b.state_province].filter(Boolean).join(", ");
+    async function loadBreweries() {
+      if (state.userLat == null || state.userLng == null) return;
 
-const g=mapsGoogle(b.latitude,b.longitude,b.name);
-const a=mapsApple(b.latitude,b.longitude,b.name);
-const u=untappdSearchLink(b.name);
+      setLoading(true);
+      setStatus("Loading breweries near you...");
 
-const card=document.createElement("div");
-card.className="card";
+      try {
+        const [page1, page2] = await Promise.all([
+          fetchBreweriesByDistance(state.userLat, state.userLng, 50, 1),
+          fetchBreweriesByDistance(state.userLat, state.userLng, 50, 2)
+        ]);
 
-card.innerHTML=`
-<div class="top">
-<h3 class="name">${b.name}</h3>
-<span class="badge dist">${b._dist.toFixed(1)} mi</span>
-</div>
+        const raw = [...page1, ...page2];
 
-<div class="meta">
-<div><b>Type:</b> ${b.brewery_type}</div>
-<div><b>Address:</b> ${address||"Unknown"}</div>
-</div>
+        const unique = [];
+        const seen = new Set();
 
-<div class="links">
-<a class="linkbtn primary" href="${g}" target="_blank">Google Maps</a>
-<a class="linkbtn" href="${a}" target="_blank">Apple Maps</a>
-<a class="linkbtn" href="${u}" target="_blank">🍺 Untappd</a>
-${b.website_url?`<a class="linkbtn" href="${b.website_url}" target="_blank">Website</a>`:""}
-</div>
-`;
+        for (const brewery of raw) {
+          const lat = Number(brewery.latitude);
+          const lng = Number(brewery.longitude);
 
-grid.appendChild(card);
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
 
-});
+          const key = `${slugify(brewery.name)}|${slugify(brewery.city)}|${slugify(brewery.state)}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
 
-}
+          const distance = haversineMiles(state.userLat, state.userLng, lat, lng);
+          const signals = fakeRatingSignals(brewery);
 
-function locateAndFetch(){
+          unique.push({
+            ...brewery,
+            latitude: lat,
+            longitude: lng,
+            distanceMiles: distance,
+            displayRating: signals.rating,
+            displayReviewCount: signals.reviewCount
+          });
+        }
 
-const btn=document.getElementById("locBtn");
-btn.disabled=true;
-btn.textContent="Locating…";
+        state.breweries = unique;
+        state.visibleCount = 20;
+        state.hasLoadedOnce = true;
 
-navigator.geolocation.getCurrentPosition(async pos=>{
+        applySortAndRender();
 
-userLat=pos.coords.latitude;
-userLon=pos.coords.longitude;
+        setStatus(
+          `Showing breweries near ${state.userLat.toFixed(4)}, ${state.userLng.toFixed(4)}`
+        );
+      } catch (error) {
+        console.error(error);
+        showError("Couldn’t load breweries right now.");
+        setStatus("Error loading breweries.");
+      } finally {
+        setLoading(false);
+      }
+    }
 
-setLocPill();
+    function sortBreweries(items, sortBy) {
+      const copy = [...items];
 
-btn.textContent="Loading…";
+      if (sortBy === "distance") {
+        copy.sort((a, b) => a.distanceMiles - b.distanceMiles);
+        return copy;
+      }
 
-await fetchBreweries(userLat,userLon);
+      if (sortBy === "reviews") {
+        copy.sort((a, b) => {
+          if (b.displayReviewCount !== a.displayReviewCount) {
+            return b.displayReviewCount - a.displayReviewCount;
+          }
+          return b.displayRating - a.displayRating;
+        });
+        return copy;
+      }
 
-btn.disabled=false;
-btn.textContent="Locate Me";
+      copy.sort((a, b) => {
+        if (b.displayRating !== a.displayRating) {
+          return b.displayRating - a.displayRating;
+        }
+        if (b.displayReviewCount !== a.displayReviewCount) {
+          return b.displayReviewCount - a.displayReviewCount;
+        }
+        return a.distanceMiles - b.distanceMiles;
+      });
 
-},()=>{
-document.getElementById("error").textContent="Location permission required.";
-btn.disabled=false;
-btn.textContent="Locate Me";
-});
-}
+      return copy;
+    }
 
-async function refreshSameLocation(){
-if(userLat==null)return;
-await fetchBreweries(userLat,userLon);
-}
+    function updateSummary(sorted) {
+      loadedCount.textContent = String(sorted.length);
+      showingCount.textContent = String(Math.min(state.visibleCount, sorted.length));
+      resultsCount.textContent = `${sorted.length} result${sorted.length === 1 ? "" : "s"}`;
 
-render();
+      if (sorted.length > 0) {
+        bestRating.textContent = `${sorted[0].displayRating.toFixed(2)}★`;
+      } else {
+        bestRating.textContent = "—";
+      }
+    }
 
-</script>
+    function renderList(sorted) {
+      const visible = sorted.slice(0, state.visibleCount);
 
+      if (!visible.length) {
+        breweryList.style.display = "none";
+        listState.style.display = "block";
+        listState.className = "empty";
+        listState.textContent = state.hasLoadedOnce
+          ? "No breweries found nearby."
+          : "Tap “Locate Me” to load breweries near you.";
+        loadMoreBtn.style.display = "none";
+        return;
+      }
+
+      listState.style.display = "none";
+      breweryList.style.display = "grid";
+
+      breweryList.innerHTML = visible
+        .map((brewery) => {
+          const address = [
+            brewery.street,
+            brewery.city,
+            brewery.state,
+            brewery.postal_code
+          ].filter(Boolean).join(", ");
+
+          const website = brewery.website_url;
+          const untappdLink = buildUntappdLink(brewery);
+
+          return `
+            <article class="brewery-card">
+              <div class="brewery-top">
+                <div>
+                  <h3 class="brewery-name">${escapeHtml(brewery.name)}</h3>
+                  <div class="brewery-type">
+                    <span>${typeIcon(brewery.brewery_type)}</span>
+                    <span>${escapeHtml(titleCase(brewery.brewery_type || "Brewery"))}</span>
+                  </div>
+                </div>
+
+                <div class="brewery-rating">
+                  <span class="stars">${ratingToStars(brewery.displayRating)}</span>
+                  <span>${brewery.displayRating.toFixed(2)}</span>
+                  <span class="rating-meta">(${formatNumber(brewery.displayReviewCount)} ratings)</span>
+                </div>
+              </div>
+
+              <div class="brewery-meta">
+                <div class="pill">📍 ${formatMiles(brewery.distanceMiles)}</div>
+                ${address ? `<div class="pill">🧭 ${escapeHtml(address)}</div>` : ""}
+                ${brewery.phone ? `<div class="pill">📞 ${escapeHtml(formatPhone(brewery.phone))}</div>` : ""}
+              </div>
+
+              <div class="brewery-actions">
+                <a
+                  class="action-link"
+                  href="${untappdLink}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View on Untappd
+                </a>
+                ${
+                  website
+                    ? `<a class="action-link" href="${escapeAttribute(website)}" target="_blank" rel="noopener noreferrer">Website</a>`
+                    : ""
+                }
+                <a
+                  class="action-link"
+                  href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${brewery.latitude},${brewery.longitude}`)}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Directions
+                </a>
+              </div>
+            </article>
+          `;
+        })
+        .join("");
+
+      loadMoreBtn.style.display =
+        state.visibleCount < sorted.length ? "inline-flex" : "none";
+    }
+
+    function renderMap(sorted) {
+      clearBreweryMarkers();
+
+      if (state.userLat != null && state.userLng != null) {
+        if (!state.userMarker) {
+          state.userMarker = L.marker([state.userLat, state.userLng]).addTo(state.map);
+        } else {
+          state.userMarker.setLatLng([state.userLat, state.userLng]);
+        }
+
+        state.userMarker.bindPopup("<strong>You are here</strong>");
+      }
+
+      const visible = sorted.slice(0, Math.min(state.visibleCount, 50));
+      const bounds = [];
+
+      if (state.userLat != null && state.userLng != null) {
+        bounds.push([state.userLat, state.userLng]);
+      }
+
+      for (const brewery of visible) {
+        const marker = L.marker([brewery.latitude, brewery.longitude]).addTo(state.map);
+
+        const popupHtml = `
+          <div>
+            <div class="popup-title">${escapeHtml(brewery.name)}</div>
+            <div class="popup-meta">
+              ${escapeHtml(titleCase(brewery.brewery_type || "Brewery"))}<br>
+              ${escapeHtml(formatMiles(brewery.distanceMiles))} away<br>
+              ⭐ ${brewery.displayRating.toFixed(2)} (${formatNumber(brewery.displayReviewCount)} ratings)
+            </div>
+            <a
+              class="popup-link"
+              href="${buildUntappdLink(brewery)}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Untappd
+            </a>
+          </div>
+        `;
+
+        marker.bindPopup(popupHtml);
+        state.breweryMarkers.push(marker);
+        bounds.push([brewery.latitude, brewery.longitude]);
+      }
+
+      if (bounds.length > 1) {
+        state.map.fitBounds(bounds, { padding: [30, 30] });
+      } else if (state.userLat != null && state.userLng != null) {
+        state.map.setView([state.userLat, state.userLng], 12);
+      }
+    }
+
+    function applySortAndRender() {
+      const sorted = sortBreweries(state.breweries, sortSelect.value);
+      updateSummary(sorted);
+      renderList(sorted);
+      renderMap(sorted);
+    }
+
+    function clearBreweryMarkers() {
+      for (const marker of state.breweryMarkers) {
+        state.map.removeLayer(marker);
+      }
+      state.breweryMarkers = [];
+    }
+
+    function setLoading(isLoading) {
+      locateBtn.disabled = isLoading;
+      refreshBtn.disabled = isLoading;
+      sortSelect.disabled = isLoading;
+
+      if (isLoading) {
+        breweryList.style.display = "none";
+        listState.style.display = "block";
+        listState.className = "loading";
+        listState.textContent = "Loading breweries...";
+        loadMoreBtn.style.display = "none";
+      }
+    }
+
+    function showError(message) {
+      breweryList.style.display = "none";
+      listState.style.display = "block";
+      listState.className = "error";
+      listState.textContent = message;
+      loadMoreBtn.style.display = "none";
+    }
+
+    function requestLocationAndLoad() {
+      if (!navigator.geolocation) {
+        showError("Geolocation isn’t supported on this device.");
+        setStatus("Geolocation not supported.");
+        return;
+      }
+
+      setStatus("Getting your location...");
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          state.userLat = position.coords.latitude;
+          state.userLng = position.coords.longitude;
+          loadBreweries();
+        },
+        (error) => {
+          console.error(error);
+          showError("Couldn’t get your location. Check browser location permissions.");
+          setStatus("Location access denied or unavailable.");
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 12000,
+          maximumAge: 300000
+        }
+      );
+    }
+
+    function formatPhone(phone) {
+      const digits = String(phone || "").replace(/\D/g, "");
+      if (digits.length === 10) {
+        return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+      }
+      return phone || "";
+    }
+
+    function formatNumber(num) {
+      return new Intl.NumberFormat("en-US").format(num);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value);
+    }
+
+    locateBtn.addEventListener("click", requestLocationAndLoad);
+
+    refreshBtn.addEventListener("click", () => {
+      if (state.userLat == null || state.userLng == null) {
+        requestLocationAndLoad();
+        return;
+      }
+      loadBreweries();
+    });
+
+    sortSelect.addEventListener("change", () => {
+      applySortAndRender();
+    });
+
+    loadMoreBtn.addEventListener("click", () => {
+      state.visibleCount += 20;
+      applySortAndRender();
+    });
+
+    window.addEventListener("load", () => {
+      initMap();
+    });
+  </script>
 </body>
 </html>
