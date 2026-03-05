@@ -1,85 +1,356 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nearby Breweries</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Brewery Finder</title>
 
-<style>
-body{
-font-family: Arial;
-background:#f4f4f4;
-padding:20px;
-}
+  <style>
+    :root{
+      --bg: #0b1220;
+      --panel: #0f1b33;
+      --card: #111c36;
+      --text: #e8eefc;
+      --muted: #a9b7d6;
+      --accent: #4ea1ff;
+      --accent2: #38d996;
+      --border: rgba(255,255,255,.10);
+      --shadow: 0 10px 25px rgba(0,0,0,.35);
+      --radius: 14px;
+    }
 
-button{
-padding:12px 16px;
-font-size:16px;
-background:#1f6feb;
-color:white;
-border:none;
-border-radius:6px;
-}
+    * { box-sizing: border-box; }
+    body{
+      margin:0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 10% 0%, #14264b 0%, var(--bg) 45%);
+      color: var(--text);
+      line-height: 1.35;
+    }
 
-.card{
-background:white;
-padding:15px;
-margin-top:15px;
-border-radius:8px;
-box-shadow:0 2px 6px rgba(0,0,0,.1);
-}
+    header{
+      padding: 18px 16px 10px;
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(10px);
+      background: rgba(11,18,32,.75);
+      border-bottom: 1px solid var(--border);
+      z-index: 5;
+    }
 
-h3{margin:0 0 5px 0}
-</style>
+    .wrap{
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 14px 16px 34px;
+    }
+
+    h1{
+      margin: 0 0 6px;
+      font-size: 20px;
+      letter-spacing: .2px;
+    }
+
+    .sub{
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .controls{
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button{
+      appearance: none;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(78,161,255,.95), rgba(78,161,255,.75));
+      color: #061125;
+      font-weight: 700;
+      padding: 11px 14px;
+      border-radius: 12px;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+    }
+    button:active{ transform: translateY(1px); }
+
+    .pill{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.04);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .grid{
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .toprow{
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .name{
+      margin:0;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
+    .badges{
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .badge{
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .badge.distance{
+      background: rgba(56,217,150,.12);
+      color: #b9ffe6;
+      border-color: rgba(56,217,150,.25);
+    }
+
+    .meta{
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .meta b{
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .links{
+      margin-top: 12px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .linkbtn{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .linkbtn.primary{
+      background: rgba(78,161,255,.15);
+      border-color: rgba(78,161,255,.35);
+      color: #dbeaff;
+    }
+    .linkbtn:hover{ filter: brightness(1.08); }
+
+    .error{
+      margin-top: 14px;
+      color: #ffb4b4;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .hint{
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+  </style>
 </head>
 
 <body>
+  <header>
+    <div class="wrap">
+      <h1>🍺 Brewery Finder</h1>
+      <p class="sub">Uses your location to find nearby breweries, adds distance + quick links.</p>
 
-<h2>🍺 Breweries Near Me</h2>
+      <div class="controls">
+        <button id="btn" onclick="getBreweries()">Locate Me & Find Breweries</button>
+        <div class="pill" id="locpill">Location: not set</div>
+      </div>
+      <div class="hint">Tip: If you don’t see results, make sure Safari location permissions are enabled for your GitHub Pages site.</div>
+    </div>
+  </header>
 
-<button onclick="findBreweries()">Find Breweries Near Me</button>
+  <main class="wrap">
+    <div id="grid" class="grid"></div>
+    <div id="error" class="error"></div>
+  </main>
 
-<div id="results"></div>
+  <script>
+    // Haversine distance in miles
+    function distanceMiles(lat1, lon1, lat2, lon2) {
+      const R = 3958.8; // Earth radius in miles
+      const toRad = (x) => x * Math.PI / 180;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
 
-<script>
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
 
-async function findBreweries(){
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
 
-if(!navigator.geolocation){
-alert("Location not supported")
-return
-}
+    function mapsLink(lat, lon, name) {
+      // Apple Maps tends to open nicely on iOS; Google Maps link works everywhere too.
+      // We'll provide Google Maps search by coordinates (fast + reliable).
+      const q = encodeURIComponent(`${lat},${lon} (${name})`);
+      return `https://www.google.com/maps/search/?api=1&query=${q}`;
+    }
 
-navigator.geolocation.getCurrentPosition(async position => {
+    function prettyType(t) {
+      if (!t) return "N/A";
+      return t.replaceAll("_", " ");
+    }
 
-const lat = position.coords.latitude
-const lon = position.coords.longitude
+    async function getBreweries() {
+      const errorEl = document.getElementById("error");
+      const grid = document.getElementById("grid");
+      const locpill = document.getElementById("locpill");
+      const btn = document.getElementById("btn");
 
-const res = await fetch(
-`https://api.openbrewerydb.org/v1/breweries?by_dist=${lat},${lon}&per_page=10`
-)
+      errorEl.textContent = "";
+      grid.innerHTML = "";
+      btn.textContent = "Locating…";
+      btn.disabled = true;
 
-const breweries = await res.json()
+      if (!navigator.geolocation) {
+        errorEl.textContent = "Geolocation isn’t supported in this browser.";
+        btn.textContent = "Locate Me & Find Breweries";
+        btn.disabled = false;
+        return;
+      }
 
-const results = document.getElementById("results")
-results.innerHTML=""
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
 
-breweries.forEach(b => {
+        locpill.textContent = `Location: ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
 
-results.innerHTML += `
-<div class="card">
-<h3>${b.name}</h3>
-<p><b>Type:</b> ${b.brewery_type}</p>
-<p><b>City:</b> ${b.city}</p>
-${b.website_url ? `<a href="${b.website_url}" target="_blank">Website</a>` : ""}
-</div>
-`
-})
+        try {
+          // Grab a few extra then filter/sort by distance ourselves
+          const url = `https://api.openbrewerydb.org/v1/breweries?by_dist=${lat},${lon}&per_page=20`;
+          const res = await fetch(url);
 
-})
+          if (!res.ok) throw new Error("API request failed");
 
-}
+          let breweries = await res.json();
+          if (!Array.isArray(breweries) || breweries.length === 0) {
+            grid.innerHTML = "<div class='card'>No breweries found near you.</div>";
+            return;
+          }
 
-</script>
+          // Enrich with distance (some entries may not have coords)
+          breweries = breweries
+            .map(b => {
+              const hasCoords = b.latitude && b.longitude;
+              const dist = hasCoords ? distanceMiles(lat, lon, Number(b.latitude), Number(b.longitude)) : null;
+              return { ...b, _dist: dist };
+            })
+            .filter(b => b._dist !== null)           // keep ones with coords
+            .sort((a, b) => a._dist - b._dist)       // nearest first
+            .slice(0, 10);
 
+          breweries.forEach(b => {
+            const distTxt = `${b._dist.toFixed(1)} mi`;
+
+            const addressParts = [b.address_1, b.city, b.state_province].filter(Boolean);
+            const address = addressParts.length ? addressParts.join(", ") : "Address not available";
+
+            const card = document.createElement("div");
+            card.className = "card";
+
+            const website = b.website_url ? b.website_url : null;
+            const gmaps = mapsLink(b.latitude, b.longitude, b.name);
+
+            card.innerHTML = `
+              <div class="toprow">
+                <div>
+                  <h3 class="name">${b.name}</h3>
+                </div>
+                <div class="badges">
+                  <span class="badge distance">${distTxt}</span>
+                  <span class="badge">${prettyType(b.brewery_type)}</span>
+                </div>
+              </div>
+
+              <div class="meta">
+                <div><b>Address:</b> ${address}</div>
+                ${b.phone ? `<div><b>Phone:</b> ${b.phone}</div>` : ``}
+              </div>
+
+              <div class="links">
+                <a class="linkbtn primary" href="${gmaps}" target="_blank" rel="noopener noreferrer">
+                  Open in Google Maps
+                </a>
+                ${website ? `
+                  <a class="linkbtn" href="${website}" target="_blank" rel="noopener noreferrer">
+                    Website / Tap List
+                  </a>` : ``}
+              </div>
+            `;
+
+            grid.appendChild(card);
+          });
+
+        } catch (e) {
+          errorEl.textContent = "Couldn’t load breweries right now. Try again in a minute.";
+        } finally {
+          btn.textContent = "Locate Me & Find Breweries";
+          btn.disabled = false;
+        }
+      }, (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+          errorEl.textContent = "Location permission denied. Enable Location Services for Safari (or allow it for this site) and try again.";
+        } else {
+          errorEl.textContent = "Couldn’t get your location. Try again.";
+        }
+        btn.textContent = "Locate Me & Find Breweries";
+        btn.disabled = false;
+      }, { enableHighAccuracy: true, timeout: 12000 });
+    }
+  </script>
 </body>
 </html>
