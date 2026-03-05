@@ -30,10 +30,6 @@
       --text: #f4f6f8;
       --muted: #a6b0bf;
       --border: #2c3442;
-      --accent: #f59e0b;
-      --accent-2: #fbbf24;
-      --green: #22c55e;
-      --red: #ef4444;
       --shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
       --radius: 16px;
       --radius-sm: 12px;
@@ -41,9 +37,7 @@
       --header-height: 72px;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html, body {
       margin: 0;
@@ -51,10 +45,6 @@
       background: var(--bg);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
-    }
-
-    body {
-      min-height: 100vh;
     }
 
     .app-header {
@@ -79,10 +69,7 @@
       gap: 12px;
     }
 
-    .logo {
-      font-size: 24px;
-      line-height: 1;
-    }
+    .logo { font-size: 24px; line-height: 1; }
 
     .title-wrap {
       display: flex;
@@ -96,10 +83,7 @@
       letter-spacing: 0.2px;
     }
 
-    .subtitle {
-      font-size: 12px;
-      color: var(--muted);
-    }
+    .subtitle { font-size: 12px; color: var(--muted); }
 
     .page {
       width: 100%;
@@ -135,11 +119,10 @@
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
+      align-items: center;
     }
 
-    button,
-    select,
-    .link-button {
+    button {
       border: 1px solid var(--border);
       background: #131821;
       color: var(--text);
@@ -147,16 +130,10 @@
       padding: 10px 14px;
       font-size: 14px;
       font-weight: 600;
-    }
-
-    button,
-    .link-button {
       cursor: pointer;
     }
 
-    button:hover,
-    select:hover,
-    .link-button:hover {
+    button:hover {
       border-color: #445066;
       background: #161d28;
     }
@@ -166,33 +143,23 @@
       cursor: not-allowed;
     }
 
-    .summary {
-      display: grid;
+    .toggle {
+      display: inline-flex;
+      align-items: center;
       gap: 10px;
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-    }
-
-    .stat {
-      background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 12px;
-    }
-
-    .stat-label {
-      font-size: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-size: 14px;
       color: var(--muted);
-      margin-bottom: 6px;
+      user-select: none;
     }
 
-    .stat-value {
-      font-size: 18px;
-      font-weight: 800;
+    .toggle input {
+      width: 18px;
+      height: 18px;
+      accent-color: #3b82f6;
     }
 
     .status {
@@ -200,9 +167,7 @@
       color: var(--muted);
     }
 
-    .map-card {
-      overflow: hidden;
-    }
+    .map-card { overflow: hidden; }
 
     #map {
       height: 320px;
@@ -224,20 +189,10 @@
       flex-wrap: wrap;
     }
 
-    .list-title {
-      font-size: 18px;
-      font-weight: 800;
-    }
+    .list-title { font-size: 18px; font-weight: 800; }
+    .results-count { color: var(--muted); font-size: 14px; }
 
-    .results-count {
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .brewery-list {
-      display: grid;
-      gap: 12px;
-    }
+    .brewery-list { display: grid; gap: 12px; }
 
     .brewery-card {
       border: 1px solid var(--border);
@@ -271,27 +226,6 @@
       margin-top: 6px;
     }
 
-    .brewery-rating {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      font-size: 15px;
-      font-weight: 700;
-    }
-
-    .stars {
-      color: var(--accent-2);
-      letter-spacing: 1px;
-      font-size: 16px;
-    }
-
-    .rating-meta {
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 600;
-    }
-
     .brewery-meta {
       display: flex;
       flex-wrap: wrap;
@@ -309,6 +243,14 @@
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.03);
     }
+
+    .pill a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .pill a:hover { text-decoration: underline; }
 
     .brewery-actions {
       display: flex;
@@ -337,9 +279,7 @@
       justify-content: center;
     }
 
-    .empty,
-    .loading,
-    .error {
+    .empty, .loading, .error {
       border: 1px dashed var(--border);
       border-radius: var(--radius-sm);
       padding: 18px;
@@ -376,30 +316,23 @@
       margin-top: 8px;
       color: #fff;
       font-weight: 700;
+      text-decoration: underline;
     }
 
     @media (max-width: 720px) {
-      .summary-grid {
-        grid-template-columns: 1fr;
-      }
-
-      #map {
-        height: 280px;
-      }
-
-      .brewery-top {
-        flex-direction: column;
-      }
+      #map { height: 280px; }
+      .brewery-top { flex-direction: column; }
     }
   </style>
 </head>
+
 <body>
   <header class="app-header">
     <div class="header-inner">
       <div class="logo">🍺</div>
       <div class="title-wrap">
         <div class="title">Brewery Finder</div>
-        <div class="subtitle">Top-rated breweries near you</div>
+        <div class="subtitle">Breweries near you (distance + map)</div>
       </div>
     </div>
   </header>
@@ -410,36 +343,15 @@
         <div class="button-row">
           <button id="locateBtn">Locate Me</button>
           <button id="refreshBtn">Refresh</button>
-        </div>
 
-        <div>
-          <label for="sortSelect" style="font-size: 13px; color: var(--muted); margin-right: 8px;">Sort by</label>
-          <select id="sortSelect">
-            <option value="rating">Rating</option>
-            <option value="distance">Distance</option>
-            <option value="reviews">Most Reviewed</option>
-          </select>
+          <label class="toggle" title="If the data has closed status, this filters them out by default.">
+            <input id="includeClosedToggle" type="checkbox" />
+            Include permanently closed
+          </label>
         </div>
       </div>
 
-      <div class="summary">
-        <div class="status" id="statusText">Location not set.</div>
-
-        <div class="summary-grid">
-          <div class="stat">
-            <div class="stat-label">Loaded</div>
-            <div class="stat-value" id="loadedCount">0</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Showing</div>
-            <div class="stat-value" id="showingCount">0</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Best Rating</div>
-            <div class="stat-value" id="bestRating">—</div>
-          </div>
-        </div>
-      </div>
+      <div class="status" id="statusText">Location not set.</div>
     </section>
 
     <section class="card map-card">
@@ -478,20 +390,15 @@
 
     const locateBtn = document.getElementById("locateBtn");
     const refreshBtn = document.getElementById("refreshBtn");
-    const sortSelect = document.getElementById("sortSelect");
+    const includeClosedToggle = document.getElementById("includeClosedToggle");
     const statusText = document.getElementById("statusText");
-    const loadedCount = document.getElementById("loadedCount");
-    const showingCount = document.getElementById("showingCount");
-    const bestRating = document.getElementById("bestRating");
     const resultsCount = document.getElementById("resultsCount");
     const listState = document.getElementById("listState");
     const breweryList = document.getElementById("breweryList");
     const loadMoreBtn = document.getElementById("loadMoreBtn");
 
     function initMap() {
-      state.map = L.map("map", {
-        zoomControl: true
-      }).setView([39.8283, -98.5795], 4);
+      state.map = L.map("map", { zoomControl: true }).setView([39.8283, -98.5795], 4);
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
@@ -517,12 +424,7 @@
     }
 
     function buildUntappdLink(brewery) {
-      const parts = [
-        brewery.name,
-        brewery.city,
-        brewery.state
-      ].filter(Boolean);
-
+      const parts = [brewery.name, brewery.city, brewery.state].filter(Boolean);
       return `${UNTAPPD_SEARCH_BASE}${encodeURIComponent(parts.join(" "))}`;
     }
 
@@ -561,34 +463,6 @@
         .join(" ");
     }
 
-    function ratingToStars(rating) {
-      if (!rating || rating <= 0) return "☆☆☆☆☆";
-      const rounded = Math.round(rating);
-      return "★".repeat(rounded) + "☆".repeat(5 - rounded);
-    }
-
-    function fakeRatingSignals(brewery) {
-      const seedString = [
-        brewery.name,
-        brewery.city,
-        brewery.state,
-        brewery.brewery_type
-      ].join("|");
-
-      let hash = 0;
-      for (let i = 0; i < seedString.length; i++) {
-        hash = (hash * 31 + seedString.charCodeAt(i)) >>> 0;
-      }
-
-      const rating = 3.6 + (hash % 140) / 100;
-      const reviewCount = 40 + (hash % 8000);
-
-      return {
-        rating: Number(Math.min(rating, 4.9).toFixed(2)),
-        reviewCount
-      };
-    }
-
     async function fetchBreweriesByDistance(lat, lng, perPage = 50, page = 1) {
       const url = new URL(OPEN_BREWERY_URL);
       url.searchParams.set("by_dist", `${lat},${lng}`);
@@ -596,11 +470,24 @@
       url.searchParams.set("page", String(page));
 
       const response = await fetch(url.toString());
-      if (!response.ok) {
-        throw new Error(`Open Brewery DB error: ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`Open Brewery DB error: ${response.status}`);
       return response.json();
+    }
+
+    function isClosed(brewery) {
+      // Open Brewery DB v1 includes `is_closed` for some records.
+      // If it's missing/undefined, treat as "unknown" (not closed).
+      return brewery && brewery.is_closed === true;
+    }
+
+    function applyClosedFilter(items) {
+      const includeClosed = includeClosedToggle.checked;
+      if (includeClosed) return items;
+      return items.filter((b) => !isClosed(b));
+    }
+
+    function sortByDistance(items) {
+      return [...items].sort((a, b) => a.distanceMiles - b.distanceMiles);
     }
 
     async function loadBreweries() {
@@ -623,7 +510,6 @@
         for (const brewery of raw) {
           const lat = Number(brewery.latitude);
           const lng = Number(brewery.longitude);
-
           if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
 
           const key = `${slugify(brewery.name)}|${slugify(brewery.city)}|${slugify(brewery.state)}`;
@@ -631,15 +517,12 @@
           seen.add(key);
 
           const distance = haversineMiles(state.userLat, state.userLng, lat, lng);
-          const signals = fakeRatingSignals(brewery);
 
           unique.push({
             ...brewery,
             latitude: lat,
             longitude: lng,
-            distanceMiles: distance,
-            displayRating: signals.rating,
-            displayReviewCount: signals.reviewCount
+            distanceMiles: distance
           });
         }
 
@@ -647,11 +530,9 @@
         state.visibleCount = 20;
         state.hasLoadedOnce = true;
 
-        applySortAndRender();
+        renderAll();
 
-        setStatus(
-          `Showing breweries near ${state.userLat.toFixed(4)}, ${state.userLng.toFixed(4)}`
-        );
+        setStatus(`Showing breweries near ${state.userLat.toFixed(4)}, ${state.userLng.toFixed(4)}`);
       } catch (error) {
         console.error(error);
         showError("Couldn’t load breweries right now.");
@@ -661,47 +542,8 @@
       }
     }
 
-    function sortBreweries(items, sortBy) {
-      const copy = [...items];
-
-      if (sortBy === "distance") {
-        copy.sort((a, b) => a.distanceMiles - b.distanceMiles);
-        return copy;
-      }
-
-      if (sortBy === "reviews") {
-        copy.sort((a, b) => {
-          if (b.displayReviewCount !== a.displayReviewCount) {
-            return b.displayReviewCount - a.displayReviewCount;
-          }
-          return b.displayRating - a.displayRating;
-        });
-        return copy;
-      }
-
-      copy.sort((a, b) => {
-        if (b.displayRating !== a.displayRating) {
-          return b.displayRating - a.displayRating;
-        }
-        if (b.displayReviewCount !== a.displayReviewCount) {
-          return b.displayReviewCount - a.displayReviewCount;
-        }
-        return a.distanceMiles - b.distanceMiles;
-      });
-
-      return copy;
-    }
-
-    function updateSummary(sorted) {
-      loadedCount.textContent = String(sorted.length);
-      showingCount.textContent = String(Math.min(state.visibleCount, sorted.length));
-      resultsCount.textContent = `${sorted.length} result${sorted.length === 1 ? "" : "s"}`;
-
-      if (sorted.length > 0) {
-        bestRating.textContent = `${sorted[0].displayRating.toFixed(2)}★`;
-      } else {
-        bestRating.textContent = "—";
-      }
+    function updateCounts(total) {
+      resultsCount.textContent = `${total} result${total === 1 ? "" : "s"}`;
     }
 
     function renderList(sorted) {
@@ -712,7 +554,7 @@
         listState.style.display = "block";
         listState.className = "empty";
         listState.textContent = state.hasLoadedOnce
-          ? "No breweries found nearby."
+          ? "No breweries found nearby (after filters)."
           : "Tap “Locate Me” to load breweries near you.";
         loadMoreBtn.style.display = "none";
         return;
@@ -723,15 +565,20 @@
 
       breweryList.innerHTML = visible
         .map((brewery) => {
-          const address = [
-            brewery.street,
-            brewery.city,
-            brewery.state,
-            brewery.postal_code
-          ].filter(Boolean).join(", ");
+          const address = [brewery.street, brewery.city, brewery.state, brewery.postal_code]
+            .filter(Boolean)
+            .join(", ");
 
           const website = brewery.website_url;
           const untappdLink = buildUntappdLink(brewery);
+
+          const phoneDigits = String(brewery.phone || "").replace(/\D/g, "");
+          const formattedPhone = formatPhone(brewery.phone);
+          const telHref = phoneDigits ? `tel:${phoneDigits}` : null;
+
+          const closedBadge = isClosed(brewery)
+            ? `<div class="pill">🚫 Permanently closed</div>`
+            : "";
 
           return `
             <article class="brewery-card">
@@ -743,27 +590,21 @@
                     <span>${escapeHtml(titleCase(brewery.brewery_type || "Brewery"))}</span>
                   </div>
                 </div>
-
-                <div class="brewery-rating">
-                  <span class="stars">${ratingToStars(brewery.displayRating)}</span>
-                  <span>${brewery.displayRating.toFixed(2)}</span>
-                  <span class="rating-meta">(${formatNumber(brewery.displayReviewCount)} ratings)</span>
-                </div>
               </div>
 
               <div class="brewery-meta">
                 <div class="pill">📍 ${formatMiles(brewery.distanceMiles)}</div>
                 ${address ? `<div class="pill">🧭 ${escapeHtml(address)}</div>` : ""}
-                ${brewery.phone ? `<div class="pill">📞 ${escapeHtml(formatPhone(brewery.phone))}</div>` : ""}
+                ${
+                  telHref
+                    ? `<div class="pill">📞 <a href="${telHref}">${escapeHtml(formattedPhone)}</a></div>`
+                    : (brewery.phone ? `<div class="pill">📞 ${escapeHtml(formattedPhone)}</div>` : "")
+                }
+                ${closedBadge}
               </div>
 
               <div class="brewery-actions">
-                <a
-                  class="action-link"
-                  href="${untappdLink}"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a class="action-link" href="${untappdLink}" target="_blank" rel="noopener noreferrer">
                   View on Untappd
                 </a>
                 ${
@@ -785,8 +626,7 @@
         })
         .join("");
 
-      loadMoreBtn.style.display =
-        state.visibleCount < sorted.length ? "inline-flex" : "none";
+      loadMoreBtn.style.display = state.visibleCount < sorted.length ? "inline-flex" : "none";
     }
 
     function renderMap(sorted) {
@@ -798,34 +638,27 @@
         } else {
           state.userMarker.setLatLng([state.userLat, state.userLng]);
         }
-
         state.userMarker.bindPopup("<strong>You are here</strong>");
       }
 
       const visible = sorted.slice(0, Math.min(state.visibleCount, 50));
       const bounds = [];
 
-      if (state.userLat != null && state.userLng != null) {
-        bounds.push([state.userLat, state.userLng]);
-      }
+      if (state.userLat != null && state.userLng != null) bounds.push([state.userLat, state.userLng]);
 
       for (const brewery of visible) {
         const marker = L.marker([brewery.latitude, brewery.longitude]).addTo(state.map);
 
+        const closedText = isClosed(brewery) ? "<br><strong>🚫 Permanently closed</strong>" : "";
         const popupHtml = `
           <div>
             <div class="popup-title">${escapeHtml(brewery.name)}</div>
             <div class="popup-meta">
               ${escapeHtml(titleCase(brewery.brewery_type || "Brewery"))}<br>
-              ${escapeHtml(formatMiles(brewery.distanceMiles))} away<br>
-              ⭐ ${brewery.displayRating.toFixed(2)} (${formatNumber(brewery.displayReviewCount)} ratings)
+              ${escapeHtml(formatMiles(brewery.distanceMiles))} away
+              ${closedText}
             </div>
-            <a
-              class="popup-link"
-              href="${buildUntappdLink(brewery)}"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a class="popup-link" href="${buildUntappdLink(brewery)}" target="_blank" rel="noopener noreferrer">
               Untappd
             </a>
           </div>
@@ -843,24 +676,23 @@
       }
     }
 
-    function applySortAndRender() {
-      const sorted = sortBreweries(state.breweries, sortSelect.value);
-      updateSummary(sorted);
+    function renderAll() {
+      const filtered = applyClosedFilter(state.breweries);
+      const sorted = sortByDistance(filtered);
+      updateCounts(sorted.length);
       renderList(sorted);
       renderMap(sorted);
     }
 
     function clearBreweryMarkers() {
-      for (const marker of state.breweryMarkers) {
-        state.map.removeLayer(marker);
-      }
+      for (const marker of state.breweryMarkers) state.map.removeLayer(marker);
       state.breweryMarkers = [];
     }
 
     function setLoading(isLoading) {
       locateBtn.disabled = isLoading;
       refreshBtn.disabled = isLoading;
-      sortSelect.disabled = isLoading;
+      includeClosedToggle.disabled = isLoading;
 
       if (isLoading) {
         breweryList.style.display = "none";
@@ -899,24 +731,14 @@
           showError("Couldn’t get your location. Check browser location permissions.");
           setStatus("Location access denied or unavailable.");
         },
-        {
-          enableHighAccuracy: true,
-          timeout: 12000,
-          maximumAge: 300000
-        }
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 300000 }
       );
     }
 
     function formatPhone(phone) {
       const digits = String(phone || "").replace(/\D/g, "");
-      if (digits.length === 10) {
-        return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-      }
+      if (digits.length === 10) return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
       return phone || "";
-    }
-
-    function formatNumber(num) {
-      return new Intl.NumberFormat("en-US").format(num);
     }
 
     function escapeHtml(value) {
@@ -942,13 +764,14 @@
       loadBreweries();
     });
 
-    sortSelect.addEventListener("change", () => {
-      applySortAndRender();
+    includeClosedToggle.addEventListener("change", () => {
+      // re-render from existing data; no refetch needed
+      renderAll();
     });
 
     loadMoreBtn.addEventListener("click", () => {
       state.visibleCount += 20;
-      applySortAndRender();
+      renderAll();
     });
 
     window.addEventListener("load", () => {
