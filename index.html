@@ -9,26 +9,26 @@
   <title>Brewery Finder</title>
   <meta
     name="description"
-    content="Find breweries near you with quick call, website, and directions links."
+    content="Find breweries near you with quick call, map, website, and Untappd links."
   />
   <style>
     :root {
       --bg: #081018;
       --bg-elev: rgba(15, 23, 42, 0.78);
       --card: rgba(15, 23, 42, 0.92);
-      --card-2: rgba(30, 41, 59, 0.8);
       --text: #f8fafc;
       --muted: #94a3b8;
       --line: rgba(148, 163, 184, 0.18);
       --accent: #22c55e;
       --accent-2: #16a34a;
+      --blue: #60a5fa;
+      --amber: #f59e0b;
       --danger: #ef4444;
       --shadow: 0 20px 45px rgba(0, 0, 0, 0.28);
       --radius-xl: 24px;
       --radius-lg: 18px;
       --radius-md: 14px;
-      --radius-sm: 12px;
-      --maxw: 860px;
+      --maxw: 960px;
     }
 
     * {
@@ -38,9 +38,10 @@
     html, body {
       margin: 0;
       padding: 0;
+      min-height: 100%;
       background:
-        radial-gradient(circle at top left, rgba(34, 197, 94, 0.22), transparent 30%),
-        radial-gradient(circle at top right, rgba(59, 130, 246, 0.16), transparent 25%),
+        radial-gradient(circle at top left, rgba(34, 197, 94, 0.20), transparent 30%),
+        radial-gradient(circle at top right, rgba(96, 165, 250, 0.16), transparent 24%),
         linear-gradient(180deg, #071019 0%, #0b1220 100%);
       color: var(--text);
       font-family:
@@ -52,7 +53,6 @@
         "Segoe UI",
         Roboto,
         sans-serif;
-      min-height: 100%;
     }
 
     a {
@@ -64,11 +64,11 @@
       font: inherit;
     }
 
-    .app {
+    .app-shell {
       width: 100%;
       max-width: var(--maxw);
       margin: 0 auto;
-      padding: 0 16px 32px;
+      padding: 0 14px 28px;
     }
 
     .topbar {
@@ -88,14 +88,14 @@
 
     .hero {
       border: 1px solid var(--line);
-      background: linear-gradient(
-        145deg,
-        rgba(15, 23, 42, 0.95),
-        rgba(15, 23, 42, 0.72)
-      );
-      box-shadow: var(--shadow);
       border-radius: var(--radius-xl);
       padding: 18px;
+      background: linear-gradient(
+        145deg,
+        rgba(15, 23, 42, 0.96),
+        rgba(15, 23, 42, 0.74)
+      );
+      box-shadow: var(--shadow);
     }
 
     .hero-top {
@@ -107,19 +107,19 @@
 
     .brand {
       display: flex;
-      align-items: center;
       gap: 12px;
+      align-items: center;
       min-width: 0;
     }
 
     .brand-mark {
-      width: 48px;
-      height: 48px;
+      width: 52px;
+      height: 52px;
       border-radius: 16px;
       display: grid;
       place-items: center;
-      font-size: 24px;
-      background: linear-gradient(135deg, rgba(34, 197, 94, 0.22), rgba(59, 130, 246, 0.18));
+      font-size: 26px;
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.22), rgba(96, 165, 250, 0.18));
       border: 1px solid rgba(255,255,255,0.08);
       flex-shrink: 0;
     }
@@ -139,7 +139,7 @@
 
     .status-pill {
       flex-shrink: 0;
-      border: 1px solid rgba(34, 197, 94, 0.28);
+      border: 1px solid rgba(34, 197, 94, 0.25);
       background: rgba(34, 197, 94, 0.12);
       color: #bbf7d0;
       padding: 10px 12px;
@@ -187,13 +187,12 @@
     .control-row {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
+      gap: 10px;
     }
 
-    .left-controls,
-    .right-controls {
+    .control-group {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
@@ -207,7 +206,7 @@
       padding: 11px 14px;
       border-radius: 14px;
       cursor: pointer;
-      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+      transition: transform 0.18s ease, border-color 0.18s ease;
     }
 
     .btn:hover {
@@ -220,10 +219,6 @@
       color: #052e16;
       border: none;
       font-weight: 800;
-    }
-
-    .btn-ghost {
-      background: rgba(15, 23, 42, 0.55);
     }
 
     .toggle {
@@ -262,6 +257,49 @@
 
     .content {
       padding-top: 18px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .map-panel {
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      overflow: hidden;
+      background: rgba(15, 23, 42, 0.72);
+      box-shadow: var(--shadow);
+    }
+
+    .map-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(2, 6, 23, 0.36);
+    }
+
+    .map-toolbar h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+    }
+
+    .map-toolbar p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    #map {
+      width: 100%;
+      height: 320px;
+      background: #0f172a;
+    }
+
+    .list-panel {
+      display: grid;
+      gap: 14px;
     }
 
     .section-head {
@@ -269,7 +307,6 @@
       justify-content: space-between;
       align-items: end;
       gap: 12px;
-      margin-bottom: 14px;
     }
 
     .section-head h2 {
@@ -290,8 +327,6 @@
     }
 
     .card {
-      position: relative;
-      overflow: hidden;
       border: 1px solid var(--line);
       border-radius: 22px;
       background:
@@ -312,9 +347,9 @@
 
     .card-top {
       display: flex;
-      gap: 14px;
       justify-content: space-between;
       align-items: flex-start;
+      gap: 14px;
     }
 
     .card-title-wrap {
@@ -328,30 +363,35 @@
       letter-spacing: -0.02em;
     }
 
-    .type-badge {
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      margin-top: 10px;
       padding: 7px 10px;
       border-radius: 999px;
-      background: rgba(59, 130, 246, 0.14);
-      color: #bfdbfe;
-      border: 1px solid rgba(59, 130, 246, 0.2);
       font-size: 12px;
       font-weight: 700;
+      border: 1px solid transparent;
       text-transform: capitalize;
     }
 
-    .distance-badge {
-      flex-shrink: 0;
-      padding: 9px 10px;
-      border-radius: 999px;
+    .badge.type {
+      background: rgba(96, 165, 250, 0.14);
+      color: #bfdbfe;
+      border-color: rgba(96, 165, 250, 0.2);
+    }
+
+    .badge.distance {
       background: rgba(34, 197, 94, 0.14);
       color: #bbf7d0;
-      border: 1px solid rgba(34, 197, 94, 0.2);
-      font-size: 12px;
-      font-weight: 700;
+      border-color: rgba(34, 197, 94, 0.2);
       white-space: nowrap;
     }
 
@@ -365,25 +405,23 @@
       display: flex;
       align-items: flex-start;
       gap: 10px;
-      color: var(--text);
       min-width: 0;
     }
 
-    .meta-row .icon {
-      color: var(--muted);
+    .icon {
       width: 18px;
       flex-shrink: 0;
       text-align: center;
+      color: var(--muted);
       margin-top: 1px;
     }
 
-    .meta-row .value {
-      color: var(--text);
+    .value {
       min-width: 0;
       word-break: break-word;
     }
 
-    .meta-row .muted {
+    .muted {
       color: var(--muted);
     }
 
@@ -414,15 +452,27 @@
       border-color: rgba(255,255,255,0.2);
     }
 
-    .action.primary {
+    .action.call {
       background: linear-gradient(135deg, rgba(34, 197, 94, 0.18), rgba(34, 197, 94, 0.1));
       border-color: rgba(34, 197, 94, 0.28);
       color: #dcfce7;
     }
 
-    .empty,
+    .action.map {
+      background: linear-gradient(135deg, rgba(96, 165, 250, 0.16), rgba(96, 165, 250, 0.08));
+      border-color: rgba(96, 165, 250, 0.22);
+      color: #dbeafe;
+    }
+
+    .action.untappd {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(245, 158, 11, 0.08));
+      border-color: rgba(245, 158, 11, 0.22);
+      color: #fde68a;
+    }
+
     .loading,
-    .error {
+    .error,
+    .empty {
       border: 1px solid var(--line);
       border-radius: 22px;
       padding: 26px 18px;
@@ -441,7 +491,7 @@
       text-align: center;
       color: var(--muted);
       font-size: 12px;
-      margin-top: 20px;
+      margin-top: 8px;
       padding-bottom: max(12px, env(safe-area-inset-bottom));
     }
 
@@ -449,12 +499,23 @@
       display: none !important;
     }
 
-    @media (max-width: 640px) {
-      .app {
-        padding-left: 12px;
-        padding-right: 12px;
+    @media (min-width: 960px) {
+      .content {
+        grid-template-columns: 1.02fr 1.18fr;
+        align-items: start;
       }
 
+      .map-panel {
+        position: sticky;
+        top: 132px;
+      }
+
+      #map {
+        height: 560px;
+      }
+    }
+
+    @media (max-width: 720px) {
       .hero {
         padding: 16px;
         border-radius: 20px;
@@ -478,10 +539,6 @@
         align-items: flex-start;
       }
 
-      .distance-badge {
-        align-self: flex-start;
-      }
-
       .actions {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -490,11 +547,22 @@
       .actions .action:last-child:nth-child(odd) {
         grid-column: span 2;
       }
+
+      #map {
+        height: 260px;
+      }
     }
   </style>
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
 </head>
 <body>
-  <div class="app">
+  <div class="app-shell">
     <header class="topbar">
       <div class="hero">
         <div class="hero-top">
@@ -502,7 +570,7 @@
             <div class="brand-mark">🍺</div>
             <div>
               <h1>Brewery Finder</h1>
-              <div class="sub">Clean, fast brewery discovery near you</div>
+              <div class="sub">Clean brewery discovery with map, directions, and Untappd</div>
             </div>
           </div>
           <div class="status-pill" id="statusPill">Waiting for location</div>
@@ -514,18 +582,18 @@
             <input
               id="searchInput"
               type="text"
-              placeholder="Search brewery name or city"
+              placeholder="Search brewery name, city, or type"
               autocomplete="off"
             />
           </div>
 
           <div class="control-row">
-            <div class="left-controls">
+            <div class="control-group">
               <button class="btn btn-primary" id="locateBtn">Locate Me</button>
-              <button class="btn btn-ghost" id="refreshBtn">Refresh</button>
+              <button class="btn" id="refreshBtn">Refresh</button>
             </div>
 
-            <div class="right-controls">
+            <div class="control-group">
               <label class="toggle">
                 <input type="checkbox" id="hideClosedToggle" checked />
                 <span>Hide closed</span>
@@ -534,32 +602,50 @@
           </div>
         </div>
 
-        <div class="summary" id="summary">
+        <div class="summary">
           <div class="summary-chip" id="locationChip">📍 Location not set</div>
           <div class="summary-chip" id="countChip">0 breweries</div>
-          <div class="summary-chip" id="rangeChip">Radius: ~25 miles</div>
+          <div class="summary-chip">🍺 No fake ratings</div>
         </div>
       </div>
     </header>
 
     <main class="content">
-      <div class="section-head">
-        <div>
-          <h2>Nearby breweries</h2>
-          <p>Tap to call, get directions, or open the brewery website.</p>
+      <section class="map-panel">
+        <div class="map-toolbar">
+          <div>
+            <h2>Map</h2>
+            <p>See nearby breweries and open directions fast.</p>
+          </div>
         </div>
-      </div>
+        <div id="map"></div>
+      </section>
 
-      <div class="loading" id="loadingState">Getting breweries near you...</div>
-      <div class="error hidden" id="errorState"></div>
-      <div class="empty hidden" id="emptyState">No breweries matched your filters.</div>
-      <section class="results hidden" id="results"></section>
+      <section class="list-panel">
+        <div class="section-head">
+          <div>
+            <h2>Nearby breweries</h2>
+            <p>Tap to call, open map directions, visit website, or search Untappd.</p>
+          </div>
+        </div>
 
-      <div class="footer-note">
-        Powered by Open Brewery DB. Directions open in Google Maps.
-      </div>
+        <div class="loading" id="loadingState">Getting breweries near you...</div>
+        <div class="error hidden" id="errorState"></div>
+        <div class="empty hidden" id="emptyState">No breweries matched your filters.</div>
+        <div class="results hidden" id="results"></div>
+      </section>
     </main>
+
+    <div class="footer-note">
+      Powered by Open Brewery DB + OpenStreetMap. Untappd links use search results based on brewery name and city.
+    </div>
   </div>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
 
   <script>
     const state = {
@@ -583,12 +669,26 @@
       statusPill: document.getElementById("statusPill"),
       locationChip: document.getElementById("locationChip"),
       countChip: document.getElementById("countChip"),
-      rangeChip: document.getElementById("rangeChip"),
       loadingState: document.getElementById("loadingState"),
       errorState: document.getElementById("errorState"),
       emptyState: document.getElementById("emptyState"),
       results: document.getElementById("results")
     };
+
+    let map;
+    let userMarker;
+    let breweryMarkers = [];
+
+    function initMap() {
+      map = L.map("map", {
+        zoomControl: true
+      }).setView([39.8283, -98.5795], 4);
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap"
+      }).addTo(map);
+    }
 
     function setLoading(isLoading, text = "Loading...") {
       state.loading = isLoading;
@@ -635,19 +735,18 @@
     }
 
     function getAddress(b) {
-      const parts = [
-        b.street,
-        b.city,
-        b.state,
-        b.postal_code
-      ].filter(Boolean);
-      return parts.join(", ");
+      return [b.street, b.city, b.state, b.postal_code].filter(Boolean).join(", ");
     }
 
     function getMapsLink(b) {
       const address = getAddress(b);
       const query = encodeURIComponent(address || `${b.name} brewery`);
       return `https://www.google.com/maps/search/?api=1&query=${query}`;
+    }
+
+    function getUntappdSearchLink(b) {
+      const query = [b.name, b.city, b.state].filter(Boolean).join(" ");
+      return `https://untappd.com/search?q=${encodeURIComponent(query)}`;
     }
 
     function haversineMiles(lat1, lon1, lat2, lon2) {
@@ -670,7 +769,7 @@
           `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
         const res = await fetch(url, {
           headers: {
-            "Accept": "application/json"
+            Accept: "application/json"
           }
         });
         if (!res.ok) throw new Error("Reverse geocode failed");
@@ -680,8 +779,8 @@
           data.address?.town ||
           data.address?.village ||
           data.address?.hamlet;
-        const state = data.address?.state;
-        if (city && state) return `${city}, ${state}`;
+        const stateName = data.address?.state;
+        if (city && stateName) return `${city}, ${stateName}`;
         if (city) return city;
         return `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
       } catch {
@@ -694,9 +793,63 @@
       return status.includes("closed");
     }
 
+    function updateMap() {
+      if (!map) return;
+
+      breweryMarkers.forEach(marker => map.removeLayer(marker));
+      breweryMarkers = [];
+
+      if (state.userLat != null && state.userLng != null) {
+        if (userMarker) {
+          userMarker.setLatLng([state.userLat, state.userLng]);
+        } else {
+          userMarker = L.marker([state.userLat, state.userLng])
+            .addTo(map)
+            .bindPopup("<strong>You are here</strong>");
+        }
+      }
+
+      const validBreweries = state.filtered.filter(b => {
+        const lat = parseFloat(b.latitude);
+        const lng = parseFloat(b.longitude);
+        return Number.isFinite(lat) && Number.isFinite(lng);
+      });
+
+      validBreweries.forEach(b => {
+        const lat = parseFloat(b.latitude);
+        const lng = parseFloat(b.longitude);
+
+        const marker = L.marker([lat, lng]).addTo(map);
+        marker.bindPopup(`
+          <strong>${escapeHtml(b.name || "Brewery")}</strong><br>
+          ${escapeHtml(getAddress(b) || "Address unavailable")}<br>
+          <a href="${getMapsLink(b)}" target="_blank" rel="noopener noreferrer">Directions</a>
+          &nbsp;|&nbsp;
+          <a href="${getUntappdSearchLink(b)}" target="_blank" rel="noopener noreferrer">Untappd</a>
+        `);
+
+        breweryMarkers.push(marker);
+      });
+
+      const bounds = [];
+
+      if (state.userLat != null && state.userLng != null) {
+        bounds.push([state.userLat, state.userLng]);
+      }
+
+      validBreweries.forEach(b => {
+        bounds.push([parseFloat(b.latitude), parseFloat(b.longitude)]);
+      });
+
+      if (bounds.length === 1) {
+        map.setView(bounds[0], 12);
+      } else if (bounds.length > 1) {
+        map.fitBounds(bounds, { padding: [40, 40] });
+      }
+    }
+
     function applyFilters() {
       const term = state.search.trim().toLowerCase();
-
       let rows = [...state.breweries];
 
       if (state.hideClosed) {
@@ -724,9 +877,11 @@
           .map(b => {
             const lat = parseFloat(b.latitude);
             const lng = parseFloat(b.longitude);
+
             if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
               return { ...b, distanceMiles: null };
             }
+
             return {
               ...b,
               distanceMiles: haversineMiles(state.userLat, state.userLng, lat, lng)
@@ -742,6 +897,7 @@
 
       state.filtered = rows;
       render();
+      updateMap();
     }
 
     function render() {
@@ -758,64 +914,76 @@
         return;
       }
 
-      els.results.innerHTML = state.filtered
-        .map(b => {
-          const address = getAddress(b);
-          const phone = formatPhone(b.phone);
-          const callLink = phoneHref(b.phone);
-          const site = cleanUrl(b.website_url);
-          const maps = getMapsLink(b);
-          const distance =
-            b.distanceMiles == null
-              ? ""
-              : `${b.distanceMiles < 10 ? b.distanceMiles.toFixed(1) : Math.round(b.distanceMiles)} mi`;
+      els.results.innerHTML = state.filtered.map(b => {
+        const address = getAddress(b);
+        const phone = formatPhone(b.phone);
+        const callLink = phoneHref(b.phone);
+        const site = cleanUrl(b.website_url);
+        const mapsLink = getMapsLink(b);
+        const untappdLink = getUntappdSearchLink(b);
 
-          const websiteButton = site
-            ? `<a class="action" href="${site}" target="_blank" rel="noopener noreferrer">🌐 Website</a>`
-            : "";
+        const distanceText =
+          b.distanceMiles == null
+            ? ""
+            : `${b.distanceMiles < 10 ? b.distanceMiles.toFixed(1) : Math.round(b.distanceMiles)} mi away`;
 
-          const callButton = callLink
-            ? `<a class="action primary" href="${callLink}">📞 Call</a>`
-            : `<span class="action" style="opacity:.55; cursor:default;">📞 No phone</span>`;
+        const websiteBtn = site
+          ? `<a class="action" href="${site}" target="_blank" rel="noopener noreferrer">🌐 Website</a>`
+          : "";
 
-          return `
-            <article class="card">
-              <div class="card-inner">
-                <div class="card-top">
-                  <div class="card-title-wrap">
-                    <h3>${safeText(b.name)}</h3>
-                    <div class="type-badge">🍻 ${formatType(b.brewery_type)}</div>
+        const callBtn = callLink
+          ? `<a class="action call" href="${callLink}">📞 Call</a>`
+          : `<span class="action" style="opacity:.55; cursor:default;">📞 No phone</span>`;
+
+        return `
+          <article class="card">
+            <div class="card-inner">
+              <div class="card-top">
+                <div class="card-title-wrap">
+                  <h3>${escapeHtml(safeText(b.name))}</h3>
+                  <div class="badges">
+                    <div class="badge type">🍻 ${escapeHtml(formatType(b.brewery_type))}</div>
+                    ${distanceText ? `<div class="badge distance">📍 ${escapeHtml(distanceText)}</div>` : ""}
                   </div>
-                  ${distance ? `<div class="distance-badge">${distance}</div>` : ""}
-                </div>
-
-                <div class="meta">
-                  <div class="meta-row">
-                    <div class="icon">📍</div>
-                    <div class="value ${address ? "" : "muted"}">${safeText(address)}</div>
-                  </div>
-
-                  <div class="meta-row">
-                    <div class="icon">🏙️</div>
-                    <div class="value">${safeText([b.city, b.state].filter(Boolean).join(", "))}</div>
-                  </div>
-
-                  <div class="meta-row">
-                    <div class="icon">📞</div>
-                    <div class="value ${phone ? "" : "muted"}">${safeText(phone)}</div>
-                  </div>
-                </div>
-
-                <div class="actions">
-                  ${callButton}
-                  <a class="action" href="${maps}" target="_blank" rel="noopener noreferrer">🗺️ Directions</a>
-                  ${websiteButton}
                 </div>
               </div>
-            </article>
-          `;
-        })
-        .join("");
+
+              <div class="meta">
+                <div class="meta-row">
+                  <div class="icon">📍</div>
+                  <div class="value ${address ? "" : "muted"}">${escapeHtml(safeText(address))}</div>
+                </div>
+
+                <div class="meta-row">
+                  <div class="icon">🏙️</div>
+                  <div class="value">${escapeHtml(safeText([b.city, b.state].filter(Boolean).join(", ")))}</div>
+                </div>
+
+                <div class="meta-row">
+                  <div class="icon">📞</div>
+                  <div class="value ${phone ? "" : "muted"}">${escapeHtml(safeText(phone))}</div>
+                </div>
+              </div>
+
+              <div class="actions">
+                ${callBtn}
+                <a class="action map" href="${mapsLink}" target="_blank" rel="noopener noreferrer">🗺️ Map</a>
+                <a class="action untappd" href="${untappdLink}" target="_blank" rel="noopener noreferrer">🍺 Untappd</a>
+                ${websiteBtn}
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
     async function fetchBreweriesByLocation(lat, lng) {
@@ -900,7 +1068,7 @@
     els.locateBtn.addEventListener("click", locateUser);
     els.refreshBtn.addEventListener("click", loadBreweriesFromCurrentLocation);
 
-    // Optional auto-attempt on load for faster UX.
+    initMap();
     locateUser();
   </script>
 </body>
