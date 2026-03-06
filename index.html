@@ -31,6 +31,7 @@
       --accent-2: #16a34a;
       --blue: #60a5fa;
       --amber: #f59e0b;
+      --danger: #ef4444;
       --shadow: 0 20px 45px rgba(0, 0, 0, 0.28);
       --radius-xl: 24px;
       --radius-lg: 18px;
@@ -78,7 +79,6 @@
       padding: 0 14px 28px;
     }
 
-    /* ONLY THIS LINE STICKS */
     .pinned-brand {
       position: sticky;
       top: 0;
@@ -173,6 +173,7 @@
 
     .search-wrap {
       position: relative;
+      z-index: 200;
     }
 
     .search-wrap input {
@@ -210,7 +211,9 @@
       border-radius: 16px;
       box-shadow: var(--shadow);
       overflow: hidden;
-      z-index: 120;
+      z-index: 300;
+      max-height: 320px;
+      overflow-y: auto;
     }
 
     .suggestion-item {
@@ -621,7 +624,7 @@
           <input
             id="locationSearch"
             type="text"
-            placeholder="Search a city or town"
+            placeholder="Search a city, neighborhood, or borough"
             autocomplete="off"
           />
           <div class="suggestions hidden" id="suggestions"></div>
@@ -694,7 +697,8 @@
       searchResults: []
     };
 
-    const API_BASE = "https://api.openbrewerydb.org/v1/breweries";
+    const BREWERY_API_BASE = "https://api.openbrewerydb.org/v1/breweries";
+    const PHOTON_API_BASE = "https://photon.komoot.io/api/";
 
     const els = {
       locateBtn: document.getElementById("locateBtn"),
@@ -800,16 +804,25 @@
     async function reverseGeocode(lat, lng) {
       try {
         const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
-        const res = await fetch(url, { headers: { Accept: "application/json" } });
+        const res = await fetch(url, {
+          headers: {
+            Accept: "application/json"
+          }
+        });
+
         if (!res.ok) throw new Error("Reverse geocode failed");
+
         const data = await res.json();
 
         const city =
           data.address?.city ||
           data.address?.town ||
           data.address?.village ||
-          data.address?.hamlet;
-        const stateName = data.address?.state;
+          data.address?.hamlet ||
+          data.address?.suburb ||
+          data.address?.borough;
+
+        const stateName = data.address?.state || "";
 
         if (city && stateName) return `${city}, ${stateName}`;
         if (city) return city;
@@ -820,53 +833,89 @@
     }
 
     async function searchPlaces(query) {
-      const url =
-        `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&addressdetails=1&featureType=city&q=${encodeURIComponent(query)}`;
+      const params = new URLSearchParams({
+        q: query,
+        limit: "8",
+        lang: "en"
+      });
 
-      const res = await fetch(url, { headers: { Accept: "application/json" } });
-      if (!res.ok) throw new Error("Place search failed");
+      if (Number.isFinite(state.userLat) && Number.isFinite(state.userLng)) {
+        params.set("lat", String(state.userLat));
+        params.set("lon", String(state.userLng));
+      }
+
+      const res = await fetch(`${PHOTON_API_BASE}?${params.toString()}`, {
+        headers: {
+          Accept: "application/json"
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error("Place search failed");
+      }
 
       const data = await res.json();
+      const features = Array.isArray(data.features) ? data.features : [];
 
-      return data
-        .filter(item => {
-          const type = (item.type || "").toLowerCase();
-          return ["city", "town", "village", "hamlet", "municipality"].includes(type);
-        })
-        .map(item => {
-          const city =
-            item.address?.city ||
-            item.address?.town ||
-            item.address?.village ||
-            item.address?.hamlet ||
-            item.name ||
-            item.display_name.split(",")[0];
+      const cleaned = features
+        .map(feature => {
+          const props = feature.properties || {};
+          const coords = feature.geometry?.coordinates || [];
+          const lon = Number(coords[0]);
+          const lat = Number(coords[1]);
 
-          const stateName = item.address?.state || "";
-          const country = item.address?.country || "";
+          const primary =
+            props.name ||
+            props.city ||
+            props.district ||
+            props.suburb ||
+            props.street ||
+            props.county ||
+            props.state;
+
+          const secondaryParts = [
+            props.city && props.city !== primary ? props.city : "",
+            props.district && props.district !== primary ? props.district : "",
+            props.suburb && props.suburb !== primary ? props.suburb : "",
+            props.state || "",
+            props.country || ""
+          ].filter(Boolean);
+
+          const typeLabel =
+            props.osm_value ||
+            props.type ||
+            "place";
 
           return {
-            label: [city, stateName].filter(Boolean).join(", "),
-            sublabel: country,
-            lat: parseFloat(item.lat),
-            lng: parseFloat(item.lon)
+            label: primary || "Unnamed place",
+            sublabel: secondaryParts.join(" • "),
+            typeLabel,
+            lat,
+            lng: lon
           };
-        });
+        })
+        .filter(item => item.label && Number.isFinite(item.lat) && Number.isFinite(item.lng));
+
+      const seen = new Set();
+      return cleaned.filter(item => {
+        const key = `${item.label}|${item.sublabel}|${item.lat.toFixed(4)}|${item.lng.toFixed(4)}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
     }
 
     function renderSuggestions(items) {
-      state.searchResults = items;
-
       if (!items.length) {
-        els.suggestions.classList.add("hidden");
         els.suggestions.innerHTML = "";
+        els.suggestions.classList.add("hidden");
         return;
       }
 
       els.suggestions.innerHTML = items.map((item, index) => `
         <button class="suggestion-item" type="button" data-index="${index}">
           <span class="suggestion-main">${escapeHtml(item.label)}</span>
-          <span class="suggestion-sub">${escapeHtml(item.sublabel || "Select this location")}</span>
+          <span class="suggestion-sub">${escapeHtml(item.sublabel || item.typeLabel || "Select this location")}</span>
         </button>
       `).join("");
 
@@ -880,8 +929,12 @@
     async function selectPlace(place) {
       state.userLat = place.lat;
       state.userLng = place.lng;
-      state.userLabel = place.label;
+      state.userLabel = place.sublabel
+        ? `${place.label}, ${place.sublabel.split(" • ")[0]}`
+        : place.label;
+
       els.locationSearch.value = place.label;
+      state.searchResults = [];
       hideSuggestions();
       await loadBreweriesFromCurrentLocation();
     }
@@ -901,7 +954,9 @@
         if (userMarker) {
           userMarker.setLatLng([state.userLat, state.userLng]);
         } else {
-          userMarker = L.marker([state.userLat, state.userLng]).addTo(map).bindPopup("<strong>Selected location</strong>");
+          userMarker = L.marker([state.userLat, state.userLng])
+            .addTo(map)
+            .bindPopup("<strong>Selected location</strong>");
         }
       }
 
@@ -1066,9 +1121,13 @@
     }
 
     async function fetchBreweriesByLocation(lat, lng) {
-      const url = `${API_BASE}?by_dist=${lat},${lng}&per_page=50`;
+      const url = `${BREWERY_API_BASE}?by_dist=${lat},${lng}&per_page=50`;
       const res = await fetch(url);
-      if (!res.ok) throw new Error("Could not load breweries.");
+
+      if (!res.ok) {
+        throw new Error("Could not load breweries.");
+      }
+
       return res.json();
     }
 
@@ -1147,16 +1206,23 @@
       clearTimeout(searchDebounce);
 
       if (value.length < 2) {
+        state.searchResults = [];
         renderSuggestions([]);
         return;
       }
 
       searchDebounce = setTimeout(async () => {
         try {
+          els.statusPill.textContent = "Searching places";
           const places = await searchPlaces(value);
+          state.searchResults = places;
           renderSuggestions(places);
-        } catch {
+          els.statusPill.textContent = places.length ? "Select a location" : "No matches";
+        } catch (err) {
+          console.error(err);
+          state.searchResults = [];
           renderSuggestions([]);
+          els.statusPill.textContent = "Search failed";
         }
       }, 250);
     });
@@ -1170,9 +1236,12 @@
       }
     });
 
-    els.suggestions.addEventListener("click", e => {
+    els.suggestions.addEventListener("mousedown", e => {
       const button = e.target.closest(".suggestion-item");
       if (!button) return;
+
+      e.preventDefault();
+
       const index = Number(button.dataset.index);
       const place = state.searchResults[index];
       if (place) selectPlace(place);
