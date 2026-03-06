@@ -9,13 +9,21 @@
   <title>Brewery Finder</title>
   <meta
     name="description"
-    content="Find breweries near you with quick call, map, website, and Untappd links."
+    content="Find breweries near you with map, Google Maps, website, and Untappd links."
   />
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+
   <style>
     :root {
       --bg: #081018;
-      --bg-elev: rgba(15, 23, 42, 0.78);
-      --card: rgba(15, 23, 42, 0.92);
+      --card: rgba(15, 23, 42, 0.94);
+      --card-soft: rgba(15, 23, 42, 0.76);
       --text: #f8fafc;
       --muted: #94a3b8;
       --line: rgba(148, 163, 184, 0.18);
@@ -23,7 +31,6 @@
       --accent-2: #16a34a;
       --blue: #60a5fa;
       --amber: #f59e0b;
-      --danger: #ef4444;
       --shadow: 0 20px 45px rgba(0, 0, 0, 0.28);
       --radius-xl: 24px;
       --radius-lg: 18px;
@@ -71,19 +78,46 @@
       padding: 0 14px 28px;
     }
 
-    .topbar {
+    /* ONLY THIS LINE STICKS */
+    .pinned-brand {
       position: sticky;
       top: 0;
-      z-index: 50;
-      padding-top: max(14px, env(safe-area-inset-top));
+      z-index: 100;
+      padding-top: max(10px, env(safe-area-inset-top));
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
       background: linear-gradient(
         180deg,
-        rgba(8, 16, 24, 0.94) 0%,
-        rgba(8, 16, 24, 0.82) 75%,
+        rgba(8, 16, 24, 0.96) 0%,
+        rgba(8, 16, 24, 0.86) 72%,
         rgba(8, 16, 24, 0) 100%
       );
+    }
+
+    .pinned-brand-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 2px 14px;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.22), rgba(96, 165, 250, 0.18));
+      border: 1px solid rgba(255,255,255,0.08);
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      margin: 0;
+      font-size: clamp(24px, 4vw, 32px);
+      line-height: 1;
+      letter-spacing: -0.03em;
     }
 
     .hero {
@@ -96,6 +130,7 @@
         rgba(15, 23, 42, 0.74)
       );
       box-shadow: var(--shadow);
+      margin-top: 4px;
     }
 
     .hero-top {
@@ -105,34 +140,15 @@
       gap: 16px;
     }
 
-    .brand {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      min-width: 0;
-    }
-
-    .brand-mark {
-      width: 52px;
-      height: 52px;
-      border-radius: 16px;
-      display: grid;
-      place-items: center;
-      font-size: 26px;
-      background: linear-gradient(135deg, rgba(34, 197, 94, 0.22), rgba(96, 165, 250, 0.18));
-      border: 1px solid rgba(255,255,255,0.08);
-      flex-shrink: 0;
-    }
-
-    h1 {
+    .hero-copy h2 {
       margin: 0;
-      font-size: clamp(28px, 4vw, 36px);
-      line-height: 1.02;
+      font-size: 24px;
+      line-height: 1.05;
       letter-spacing: -0.03em;
     }
 
     .sub {
-      margin-top: 6px;
+      margin-top: 8px;
       color: var(--muted);
       font-size: 14px;
     }
@@ -182,6 +198,50 @@
       transform: translateY(-50%);
       color: var(--muted);
       pointer-events: none;
+    }
+
+    .suggestions {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(100% + 8px);
+      background: rgba(15, 23, 42, 0.98);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      z-index: 120;
+    }
+
+    .suggestion-item {
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+      background: transparent;
+      color: var(--text);
+      text-align: left;
+      padding: 14px 16px;
+      cursor: pointer;
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-item:hover {
+      background: rgba(30, 41, 59, 0.85);
+    }
+
+    .suggestion-main {
+      display: block;
+      font-weight: 700;
+    }
+
+    .suggestion-sub {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px;
     }
 
     .control-row {
@@ -239,20 +299,10 @@
       margin: 0;
     }
 
-    .summary {
-      margin-top: 18px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .summary-chip {
-      border: 1px solid var(--line);
-      background: rgba(2, 6, 23, 0.42);
+    .location-line {
+      margin-top: 12px;
       color: var(--muted);
-      padding: 10px 12px;
-      border-radius: 999px;
-      font-size: 13px;
+      font-size: 14px;
     }
 
     .content {
@@ -279,7 +329,7 @@
       background: rgba(2, 6, 23, 0.36);
     }
 
-    .map-toolbar h2 {
+    .map-toolbar h3 {
       margin: 0;
       font-size: 18px;
       letter-spacing: -0.02em;
@@ -302,14 +352,7 @@
       gap: 14px;
     }
 
-    .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: end;
-      gap: 12px;
-    }
-
-    .section-head h2 {
+    .section-head h3 {
       margin: 0;
       font-size: 20px;
       letter-spacing: -0.02em;
@@ -356,7 +399,7 @@
       min-width: 0;
     }
 
-    .card h3 {
+    .card h4 {
       margin: 0;
       font-size: 21px;
       line-height: 1.1;
@@ -487,16 +530,16 @@
       background: rgba(127, 29, 29, 0.18);
     }
 
+    .hidden {
+      display: none !important;
+    }
+
     .footer-note {
       text-align: center;
       color: var(--muted);
       font-size: 12px;
       margin-top: 8px;
       padding-bottom: max(12px, env(safe-area-inset-bottom));
-    }
-
-    .hidden {
-      display: none !important;
     }
 
     @media (min-width: 960px) {
@@ -507,7 +550,7 @@
 
       .map-panel {
         position: sticky;
-        top: 132px;
+        top: 86px;
       }
 
       #map {
@@ -553,68 +596,60 @@
       }
     }
   </style>
-
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""
-  />
 </head>
 <body>
   <div class="app-shell">
-    <header class="topbar">
-      <div class="hero">
-        <div class="hero-top">
-          <div class="brand">
-            <div class="brand-mark">🍺</div>
-            <div>
-              <h1>Brewery Finder</h1>
-              <div class="sub">Clean brewery discovery with map, directions, and Untappd</div>
-            </div>
-          </div>
-          <div class="status-pill" id="statusPill">Waiting for location</div>
+    <div class="pinned-brand">
+      <div class="pinned-brand-inner">
+        <div class="brand-mark">🍺</div>
+        <h1 class="brand-title">Brewery Finder</h1>
+      </div>
+    </div>
+
+    <section class="hero">
+      <div class="hero-top">
+        <div class="hero-copy">
+          <h2>Brewery Finder</h2>
+          <div class="sub">Presented by the DK: Hot, single breweries in your area</div>
+        </div>
+        <div class="status-pill" id="statusPill">Waiting for location</div>
+      </div>
+
+      <div class="controls">
+        <div class="search-wrap">
+          <span class="search-icon">⌕</span>
+          <input
+            id="locationSearch"
+            type="text"
+            placeholder="Search a city or town"
+            autocomplete="off"
+          />
+          <div class="suggestions hidden" id="suggestions"></div>
         </div>
 
-        <div class="controls">
-          <div class="search-wrap">
-            <span class="search-icon">⌕</span>
-            <input
-              id="searchInput"
-              type="text"
-              placeholder="Search brewery name, city, or type"
-              autocomplete="off"
-            />
+        <div class="control-row">
+          <div class="control-group">
+            <button class="btn btn-primary" id="locateBtn">Use My Location</button>
+            <button class="btn" id="refreshBtn">Refresh</button>
           </div>
 
-          <div class="control-row">
-            <div class="control-group">
-              <button class="btn btn-primary" id="locateBtn">Locate Me</button>
-              <button class="btn" id="refreshBtn">Refresh</button>
-            </div>
-
-            <div class="control-group">
-              <label class="toggle">
-                <input type="checkbox" id="hideClosedToggle" checked />
-                <span>Hide closed</span>
-              </label>
-            </div>
+          <div class="control-group">
+            <label class="toggle">
+              <input type="checkbox" id="hideClosedToggle" checked />
+              <span>Hide closed</span>
+            </label>
           </div>
-        </div>
-
-        <div class="summary">
-          <div class="summary-chip" id="locationChip">📍 Location not set</div>
-          <div class="summary-chip" id="countChip">0 breweries</div>
-          <div class="summary-chip">🍺 No fake ratings</div>
         </div>
       </div>
-    </header>
+
+      <div class="location-line" id="locationLine">Current area: not set</div>
+    </section>
 
     <main class="content">
       <section class="map-panel">
         <div class="map-toolbar">
           <div>
-            <h2>Map</h2>
+            <h3>Map</h3>
             <p>See nearby breweries and open directions fast.</p>
           </div>
         </div>
@@ -624,8 +659,8 @@
       <section class="list-panel">
         <div class="section-head">
           <div>
-            <h2>Nearby breweries</h2>
-            <p>Tap to call, open map directions, visit website, or search Untappd.</p>
+            <h3>Nearby breweries</h3>
+            <p>Tap to call, open Google Maps, visit website, or search Untappd.</p>
           </div>
         </div>
 
@@ -653,10 +688,10 @@
       filtered: [],
       userLat: null,
       userLng: null,
-      userLabel: "Location not set",
-      search: "",
+      userLabel: "not set",
       hideClosed: true,
-      loading: false
+      loading: false,
+      searchResults: []
     };
 
     const API_BASE = "https://api.openbrewerydb.org/v1/breweries";
@@ -664,25 +699,24 @@
     const els = {
       locateBtn: document.getElementById("locateBtn"),
       refreshBtn: document.getElementById("refreshBtn"),
-      searchInput: document.getElementById("searchInput"),
       hideClosedToggle: document.getElementById("hideClosedToggle"),
       statusPill: document.getElementById("statusPill"),
-      locationChip: document.getElementById("locationChip"),
-      countChip: document.getElementById("countChip"),
+      locationLine: document.getElementById("locationLine"),
       loadingState: document.getElementById("loadingState"),
       errorState: document.getElementById("errorState"),
       emptyState: document.getElementById("emptyState"),
-      results: document.getElementById("results")
+      results: document.getElementById("results"),
+      locationSearch: document.getElementById("locationSearch"),
+      suggestions: document.getElementById("suggestions")
     };
 
     let map;
     let userMarker;
     let breweryMarkers = [];
+    let searchDebounce;
 
     function initMap() {
-      map = L.map("map", {
-        zoomControl: true
-      }).setView([39.8283, -98.5795], 4);
+      map = L.map("map", { zoomControl: true }).setView([39.8283, -98.5795], 4);
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
@@ -765,27 +799,91 @@
 
     async function reverseGeocode(lat, lng) {
       try {
-        const url =
-          `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
-        const res = await fetch(url, {
-          headers: {
-            Accept: "application/json"
-          }
-        });
+        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+        const res = await fetch(url, { headers: { Accept: "application/json" } });
         if (!res.ok) throw new Error("Reverse geocode failed");
         const data = await res.json();
+
         const city =
           data.address?.city ||
           data.address?.town ||
           data.address?.village ||
           data.address?.hamlet;
         const stateName = data.address?.state;
+
         if (city && stateName) return `${city}, ${stateName}`;
         if (city) return city;
         return `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
       } catch {
         return `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
       }
+    }
+
+    async function searchPlaces(query) {
+      const url =
+        `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&addressdetails=1&featureType=city&q=${encodeURIComponent(query)}`;
+
+      const res = await fetch(url, { headers: { Accept: "application/json" } });
+      if (!res.ok) throw new Error("Place search failed");
+
+      const data = await res.json();
+
+      return data
+        .filter(item => {
+          const type = (item.type || "").toLowerCase();
+          return ["city", "town", "village", "hamlet", "municipality"].includes(type);
+        })
+        .map(item => {
+          const city =
+            item.address?.city ||
+            item.address?.town ||
+            item.address?.village ||
+            item.address?.hamlet ||
+            item.name ||
+            item.display_name.split(",")[0];
+
+          const stateName = item.address?.state || "";
+          const country = item.address?.country || "";
+
+          return {
+            label: [city, stateName].filter(Boolean).join(", "),
+            sublabel: country,
+            lat: parseFloat(item.lat),
+            lng: parseFloat(item.lon)
+          };
+        });
+    }
+
+    function renderSuggestions(items) {
+      state.searchResults = items;
+
+      if (!items.length) {
+        els.suggestions.classList.add("hidden");
+        els.suggestions.innerHTML = "";
+        return;
+      }
+
+      els.suggestions.innerHTML = items.map((item, index) => `
+        <button class="suggestion-item" type="button" data-index="${index}">
+          <span class="suggestion-main">${escapeHtml(item.label)}</span>
+          <span class="suggestion-sub">${escapeHtml(item.sublabel || "Select this location")}</span>
+        </button>
+      `).join("");
+
+      els.suggestions.classList.remove("hidden");
+    }
+
+    function hideSuggestions() {
+      els.suggestions.classList.add("hidden");
+    }
+
+    async function selectPlace(place) {
+      state.userLat = place.lat;
+      state.userLng = place.lng;
+      state.userLabel = place.label;
+      els.locationSearch.value = place.label;
+      hideSuggestions();
+      await loadBreweriesFromCurrentLocation();
     }
 
     function isClosed(b) {
@@ -803,9 +901,7 @@
         if (userMarker) {
           userMarker.setLatLng([state.userLat, state.userLng]);
         } else {
-          userMarker = L.marker([state.userLat, state.userLng])
-            .addTo(map)
-            .bindPopup("<strong>You are here</strong>");
+          userMarker = L.marker([state.userLat, state.userLng]).addTo(map).bindPopup("<strong>Selected location</strong>");
         }
       }
 
@@ -823,7 +919,7 @@
         marker.bindPopup(`
           <strong>${escapeHtml(b.name || "Brewery")}</strong><br>
           ${escapeHtml(getAddress(b) || "Address unavailable")}<br>
-          <a href="${getMapsLink(b)}" target="_blank" rel="noopener noreferrer">Directions</a>
+          <a href="${getMapsLink(b)}" target="_blank" rel="noopener noreferrer">Google Maps</a>
           &nbsp;|&nbsp;
           <a href="${getUntappdSearchLink(b)}" target="_blank" rel="noopener noreferrer">Untappd</a>
         `);
@@ -849,27 +945,10 @@
     }
 
     function applyFilters() {
-      const term = state.search.trim().toLowerCase();
       let rows = [...state.breweries];
 
       if (state.hideClosed) {
         rows = rows.filter(b => !isClosed(b));
-      }
-
-      if (term) {
-        rows = rows.filter(b => {
-          const haystack = [
-            b.name,
-            b.city,
-            b.state,
-            b.brewery_type
-          ]
-            .filter(Boolean)
-            .join(" ")
-            .toLowerCase();
-
-          return haystack.includes(term);
-        });
       }
 
       if (state.userLat != null && state.userLng != null) {
@@ -901,11 +980,11 @@
     }
 
     function render() {
-      const count = state.filtered.length;
-      els.countChip.textContent = `${count} ${count === 1 ? "brewery" : "breweries"}`;
-      els.locationChip.textContent = `📍 ${state.userLabel}`;
+      els.locationLine.textContent = `Current area: ${state.userLabel}`;
 
+      const count = state.filtered.length;
       const hasRows = count > 0;
+
       els.results.classList.toggle("hidden", !hasRows);
       els.emptyState.classList.toggle("hidden", hasRows || state.loading);
 
@@ -940,7 +1019,7 @@
             <div class="card-inner">
               <div class="card-top">
                 <div class="card-title-wrap">
-                  <h3>${escapeHtml(safeText(b.name))}</h3>
+                  <h4>${escapeHtml(safeText(b.name))}</h4>
                   <div class="badges">
                     <div class="badge type">🍻 ${escapeHtml(formatType(b.brewery_type))}</div>
                     ${distanceText ? `<div class="badge distance">📍 ${escapeHtml(distanceText)}</div>` : ""}
@@ -967,7 +1046,7 @@
 
               <div class="actions">
                 ${callBtn}
-                <a class="action map" href="${mapsLink}" target="_blank" rel="noopener noreferrer">🗺️ Map</a>
+                <a class="action map" href="${mapsLink}" target="_blank" rel="noopener noreferrer">🗺️ Google Maps</a>
                 <a class="action untappd" href="${untappdLink}" target="_blank" rel="noopener noreferrer">🍺 Untappd</a>
                 ${websiteBtn}
               </div>
@@ -989,27 +1068,25 @@
     async function fetchBreweriesByLocation(lat, lng) {
       const url = `${API_BASE}?by_dist=${lat},${lng}&per_page=50`;
       const res = await fetch(url);
-      if (!res.ok) {
-        throw new Error("Could not load breweries.");
-      }
+      if (!res.ok) throw new Error("Could not load breweries.");
       return res.json();
     }
 
     async function loadBreweriesFromCurrentLocation() {
       if (state.userLat == null || state.userLng == null) {
-        setError("Location not set yet. Tap Locate Me first.");
+        setError("Location not set yet. Use your location or search a city.");
         return;
       }
 
       setError("");
-      setLoading(true, "Finding breweries near you...");
+      setLoading(true, "Finding breweries near this location...");
       els.statusPill.textContent = "Loading breweries";
 
       try {
         const rows = await fetchBreweriesByLocation(state.userLat, state.userLng);
         state.breweries = Array.isArray(rows) ? rows : [];
         applyFilters();
-        els.statusPill.textContent = "Breweries loaded";
+        els.statusPill.textContent = `${state.filtered.length} breweries loaded`;
       } catch (err) {
         setError(err.message || "Something went wrong while loading breweries.");
         els.statusPill.textContent = "Load failed";
@@ -1033,7 +1110,8 @@
           state.userLat = position.coords.latitude;
           state.userLng = position.coords.longitude;
           state.userLabel = await reverseGeocode(state.userLat, state.userLng);
-          els.statusPill.textContent = "Location found";
+          els.locationSearch.value = state.userLabel;
+          hideSuggestions();
           setLoading(false);
           await loadBreweriesFromCurrentLocation();
         },
@@ -1055,11 +1133,6 @@
       );
     }
 
-    els.searchInput.addEventListener("input", e => {
-      state.search = e.target.value || "";
-      applyFilters();
-    });
-
     els.hideClosedToggle.addEventListener("change", e => {
       state.hideClosed = e.target.checked;
       applyFilters();
@@ -1067,6 +1140,49 @@
 
     els.locateBtn.addEventListener("click", locateUser);
     els.refreshBtn.addEventListener("click", loadBreweriesFromCurrentLocation);
+
+    els.locationSearch.addEventListener("input", () => {
+      const value = els.locationSearch.value.trim();
+
+      clearTimeout(searchDebounce);
+
+      if (value.length < 2) {
+        renderSuggestions([]);
+        return;
+      }
+
+      searchDebounce = setTimeout(async () => {
+        try {
+          const places = await searchPlaces(value);
+          renderSuggestions(places);
+        } catch {
+          renderSuggestions([]);
+        }
+      }, 250);
+    });
+
+    els.locationSearch.addEventListener("keydown", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (state.searchResults.length) {
+          selectPlace(state.searchResults[0]);
+        }
+      }
+    });
+
+    els.suggestions.addEventListener("click", e => {
+      const button = e.target.closest(".suggestion-item");
+      if (!button) return;
+      const index = Number(button.dataset.index);
+      const place = state.searchResults[index];
+      if (place) selectPlace(place);
+    });
+
+    document.addEventListener("click", e => {
+      if (!e.target.closest(".search-wrap")) {
+        hideSuggestions();
+      }
+    });
 
     initMap();
     locateUser();
