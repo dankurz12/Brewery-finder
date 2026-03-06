@@ -1,1260 +1,440 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  />
-  <title>Brewery Finder</title>
-  <meta
-    name="description"
-    content="Find breweries near you with map, Google Maps, website, and Untappd links."
-  />
-
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""
-  />
-
-  <style>
-    :root {
-      --bg: #081018;
-      --card: rgba(15, 23, 42, 0.94);
-      --card-soft: rgba(15, 23, 42, 0.76);
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --line: rgba(148, 163, 184, 0.18);
-      --accent: #22c55e;
-      --accent-2: #16a34a;
-      --blue: #60a5fa;
-      --amber: #f59e0b;
-      --danger: #ef4444;
-      --shadow: 0 20px 45px rgba(0, 0, 0, 0.28);
-      --radius-xl: 24px;
-      --radius-lg: 18px;
-      --radius-md: 14px;
-      --maxw: 960px;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      min-height: 100%;
-      background:
-        radial-gradient(circle at top left, rgba(34, 197, 94, 0.20), transparent 30%),
-        radial-gradient(circle at top right, rgba(96, 165, 250, 0.16), transparent 24%),
-        linear-gradient(180deg, #071019 0%, #0b1220 100%);
-      color: var(--text);
-      font-family:
-        Inter,
-        ui-sans-serif,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        Roboto,
-        sans-serif;
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    button, input {
-      font: inherit;
-    }
-
-    .app-shell {
-      width: 100%;
-      max-width: var(--maxw);
-      margin: 0 auto;
-      padding: 0 14px 28px;
-    }
-
-    .pinned-brand {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      padding-top: max(10px, env(safe-area-inset-top));
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      background: linear-gradient(
-        180deg,
-        rgba(8, 16, 24, 0.96) 0%,
-        rgba(8, 16, 24, 0.86) 72%,
-        rgba(8, 16, 24, 0) 100%
-      );
-    }
-
-    .pinned-brand-inner {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 2px 14px;
-    }
-
-    .brand-mark {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      font-size: 22px;
-      background: linear-gradient(135deg, rgba(34, 197, 94, 0.22), rgba(96, 165, 250, 0.18));
-      border: 1px solid rgba(255,255,255,0.08);
-      flex-shrink: 0;
-    }
-
-    .brand-title {
-      margin: 0;
-      font-size: clamp(24px, 4vw, 32px);
-      line-height: 1;
-      letter-spacing: -0.03em;
-    }
-
-    .hero {
-      border: 1px solid var(--line);
-      border-radius: var(--radius-xl);
-      padding: 18px;
-      background: linear-gradient(
-        145deg,
-        rgba(15, 23, 42, 0.96),
-        rgba(15, 23, 42, 0.74)
-      );
-      box-shadow: var(--shadow);
-      margin-top: 4px;
-    }
-
-    .hero-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 16px;
-    }
-
-    .hero-copy h2 {
-      margin: 0;
-      font-size: 24px;
-      line-height: 1.05;
-      letter-spacing: -0.03em;
-    }
-
-    .sub {
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .status-pill {
-      flex-shrink: 0;
-      border: 1px solid rgba(34, 197, 94, 0.25);
-      background: rgba(34, 197, 94, 0.12);
-      color: #bbf7d0;
-      padding: 10px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .controls {
-      margin-top: 16px;
-      display: grid;
-      gap: 12px;
-    }
-
-    .search-wrap {
-      position: relative;
-      z-index: 200;
-    }
-
-    .search-wrap input {
-      width: 100%;
-      border: 1px solid var(--line);
-      background: rgba(2, 6, 23, 0.62);
-      color: var(--text);
-      border-radius: 16px;
-      padding: 15px 16px 15px 46px;
-      outline: none;
-      transition: border-color 0.2s ease, transform 0.2s ease;
-    }
-
-    .search-wrap input:focus {
-      border-color: rgba(34, 197, 94, 0.45);
-      transform: translateY(-1px);
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--muted);
-      pointer-events: none;
-    }
-
-    .suggestions {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: calc(100% + 8px);
-      background: rgba(15, 23, 42, 0.98);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      z-index: 300;
-      max-height: 320px;
-      overflow-y: auto;
-    }
-
-    .suggestion-item {
-      width: 100%;
-      border: none;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.12);
-      background: transparent;
-      color: var(--text);
-      text-align: left;
-      padding: 14px 16px;
-      cursor: pointer;
-    }
-
-    .suggestion-item:last-child {
-      border-bottom: none;
-    }
-
-    .suggestion-item:hover {
-      background: rgba(30, 41, 59, 0.85);
-    }
-
-    .suggestion-main {
-      display: block;
-      font-weight: 700;
-    }
-
-    .suggestion-sub {
-      display: block;
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 4px;
-    }
-
-    .control-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .control-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .btn {
-      border: 1px solid var(--line);
-      background: rgba(15, 23, 42, 0.78);
-      color: var(--text);
-      padding: 11px 14px;
-      border-radius: 14px;
-      cursor: pointer;
-      transition: transform 0.18s ease, border-color 0.18s ease;
-    }
-
-    .btn:hover {
-      transform: translateY(-1px);
-      border-color: rgba(255,255,255,0.2);
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #052e16;
-      border: none;
-      font-weight: 800;
-    }
-
-    .toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 11px 14px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(15, 23, 42, 0.78);
-      color: var(--text);
-    }
-
-    .toggle input {
-      accent-color: var(--accent);
-      width: 16px;
-      height: 16px;
-      margin: 0;
-    }
-
-    .location-line {
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .content {
-      padding-top: 18px;
-      display: grid;
-      gap: 16px;
-    }
-
-    .map-panel {
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      overflow: hidden;
-      background: rgba(15, 23, 42, 0.72);
-      box-shadow: var(--shadow);
-    }
-
-    .map-toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(2, 6, 23, 0.36);
-    }
-
-    .map-toolbar h3 {
-      margin: 0;
-      font-size: 18px;
-      letter-spacing: -0.02em;
-    }
-
-    .map-toolbar p {
-      margin: 4px 0 0;
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    #map {
-      width: 100%;
-      height: 320px;
-      background: #0f172a;
-    }
-
-    .list-panel {
-      display: grid;
-      gap: 14px;
-    }
-
-    .section-head h3 {
-      margin: 0;
-      font-size: 20px;
-      letter-spacing: -0.02em;
-    }
-
-    .section-head p {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .results {
-      display: grid;
-      gap: 14px;
-    }
-
-    .card {
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      background:
-        linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.84)),
-        linear-gradient(135deg, rgba(34, 197, 94, 0.08), transparent 40%);
-      box-shadow: var(--shadow);
-      transition: transform 0.2s ease, border-color 0.2s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(34, 197, 94, 0.25);
-    }
-
-    .card-inner {
-      padding: 18px;
-    }
-
-    .card-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 14px;
-    }
-
-    .card-title-wrap {
-      min-width: 0;
-    }
-
-    .card h4 {
-      margin: 0;
-      font-size: 21px;
-      line-height: 1.1;
-      letter-spacing: -0.02em;
-    }
-
-    .badges {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      border: 1px solid transparent;
-      text-transform: capitalize;
-    }
-
-    .badge.type {
-      background: rgba(96, 165, 250, 0.14);
-      color: #bfdbfe;
-      border-color: rgba(96, 165, 250, 0.2);
-    }
-
-    .badge.distance {
-      background: rgba(34, 197, 94, 0.14);
-      color: #bbf7d0;
-      border-color: rgba(34, 197, 94, 0.2);
-      white-space: nowrap;
-    }
-
-    .meta {
-      display: grid;
-      gap: 10px;
-      margin-top: 16px;
-    }
-
-    .meta-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      min-width: 0;
-    }
-
-    .icon {
-      width: 18px;
-      flex-shrink: 0;
-      text-align: center;
-      color: var(--muted);
-      margin-top: 1px;
-    }
-
-    .value {
-      min-width: 0;
-      word-break: break-word;
-    }
-
-    .muted {
-      color: var(--muted);
-    }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 18px;
-    }
-
-    .action {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      min-height: 44px;
-      padding: 11px 14px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(15, 23, 42, 0.68);
-      color: var(--text);
-      font-weight: 700;
-      transition: transform 0.18s ease, border-color 0.18s ease;
-    }
-
-    .action:hover {
-      transform: translateY(-1px);
-      border-color: rgba(255,255,255,0.2);
-    }
-
-    .action.call {
-      background: linear-gradient(135deg, rgba(34, 197, 94, 0.18), rgba(34, 197, 94, 0.1));
-      border-color: rgba(34, 197, 94, 0.28);
-      color: #dcfce7;
-    }
-
-    .action.map {
-      background: linear-gradient(135deg, rgba(96, 165, 250, 0.16), rgba(96, 165, 250, 0.08));
-      border-color: rgba(96, 165, 250, 0.22);
-      color: #dbeafe;
-    }
-
-    .action.untappd {
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(245, 158, 11, 0.08));
-      border-color: rgba(245, 158, 11, 0.22);
-      color: #fde68a;
-    }
-
-    .loading,
-    .error,
-    .empty {
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      padding: 26px 18px;
-      background: rgba(15, 23, 42, 0.7);
-      color: var(--muted);
-      text-align: center;
-    }
-
-    .error {
-      color: #fecaca;
-      border-color: rgba(239, 68, 68, 0.22);
-      background: rgba(127, 29, 29, 0.18);
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    .footer-note {
-      text-align: center;
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 8px;
-      padding-bottom: max(12px, env(safe-area-inset-bottom));
-    }
-
-    @media (min-width: 960px) {
-      .content {
-        grid-template-columns: 1.02fr 1.18fr;
-        align-items: start;
-      }
-
-      .map-panel {
-        position: sticky;
-        top: 86px;
-      }
-
-      #map {
-        height: 560px;
-      }
-    }
-
-    @media (max-width: 720px) {
-      .hero {
-        padding: 16px;
-        border-radius: 20px;
-      }
-
-      .hero-top {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .status-pill {
-        align-self: flex-start;
-      }
-
-      .card-inner {
-        padding: 16px;
-      }
-
-      .card-top {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .actions {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .actions .action:last-child:nth-child(odd) {
-        grid-column: span 2;
-      }
-
-      #map {
-        height: 260px;
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>Brewery Finder</title>
+
+<link
+rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<style>
+
+:root{
+--bg:#081018;
+--card:#0f172a;
+--text:#f8fafc;
+--muted:#94a3b8;
+--line:rgba(148,163,184,.18);
+--accent:#22c55e;
+--shadow:0 15px 40px rgba(0,0,0,.35);
+--radius:16px;
+--maxw:960px;
+}
+
+*{box-sizing:border-box}
+
+body{
+margin:0;
+font-family:system-ui, -apple-system, Segoe UI, Roboto;
+background:linear-gradient(#071019,#0b1220);
+color:var(--text);
+}
+
+.app{
+max-width:var(--maxw);
+margin:auto;
+padding:0 16px 40px;
+}
+
+/* HEADER */
+
+.header{
+position:sticky;
+top:0;
+z-index:100;
+backdrop-filter:blur(14px);
+background:rgba(8,16,24,.9);
+border-bottom:1px solid var(--line);
+}
+
+.header-inner{
+display:flex;
+align-items:center;
+gap:14px;
+padding:14px 6px;
+}
+
+.brand-logo{
+width:52px;
+height:52px;
+object-fit:contain;
+border-radius:12px;
+}
+
+.brand-title{
+font-size:28px;
+font-weight:700;
+letter-spacing:-.02em;
+}
+
+/* HERO */
+
+.hero{
+margin-top:16px;
+background:var(--card);
+border-radius:var(--radius);
+padding:18px;
+border:1px solid var(--line);
+box-shadow:var(--shadow);
+}
+
+.hero h2{
+margin:0;
+font-size:22px;
+}
+
+.sub{
+margin-top:6px;
+color:var(--muted);
+font-size:14px;
+}
+
+/* SEARCH */
+
+.search{
+margin-top:16px;
+position:relative;
+}
+
+.search input{
+width:100%;
+padding:14px 16px;
+border-radius:14px;
+border:1px solid var(--line);
+background:#020617;
+color:white;
+}
+
+.suggestions{
+position:absolute;
+left:0;
+right:0;
+top:105%;
+background:#020617;
+border-radius:14px;
+border:1px solid var(--line);
+overflow:hidden;
+z-index:200;
+}
+
+.suggestion{
+padding:12px 14px;
+cursor:pointer;
+border-bottom:1px solid var(--line);
+}
+
+.suggestion:hover{
+background:#1e293b;
+}
+
+.hidden{
+display:none;
+}
+
+/* BUTTONS */
+
+.controls{
+margin-top:14px;
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+}
+
+button{
+background:var(--accent);
+border:none;
+padding:10px 14px;
+border-radius:12px;
+font-weight:600;
+cursor:pointer;
+}
+
+.secondary{
+background:#1e293b;
+color:white;
+border:1px solid var(--line);
+}
+
+/* MAP */
+
+.map{
+margin-top:18px;
+border-radius:var(--radius);
+overflow:hidden;
+border:1px solid var(--line);
+}
+
+#map{
+height:320px;
+}
+
+/* BREWERIES */
+
+.list{
+margin-top:18px;
+display:grid;
+gap:14px;
+}
+
+.card{
+background:var(--card);
+border-radius:var(--radius);
+border:1px solid var(--line);
+padding:16px;
+box-shadow:var(--shadow);
+}
+
+.card h3{
+margin:0;
+font-size:20px;
+}
+
+.meta{
+margin-top:10px;
+color:var(--muted);
+font-size:14px;
+}
+
+.actions{
+margin-top:14px;
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+}
+
+.action{
+padding:10px 12px;
+border-radius:10px;
+background:#1e293b;
+border:1px solid var(--line);
+font-size:14px;
+}
+
+.action:hover{
+background:#334155;
+}
+
+.call{
+background:#22c55e22;
+border:1px solid #22c55e55;
+}
+
+.maps{
+background:#3b82f622;
+border:1px solid #3b82f655;
+}
+
+.untappd{
+background:#f59e0b22;
+border:1px solid #f59e0b55;
+}
+
+</style>
 </head>
+
 <body>
-  <div class="app-shell">
-    <div class="pinned-brand">
-      <div class="pinned-brand-inner">
-        <div class="brand-mark">🍺</div>
-        <h1 class="brand-title">Brewery Finder</h1>
-      </div>
-    </div>
-
-    <section class="hero">
-      <div class="hero-top">
-        <div class="hero-copy">
-          <h2>Brewery Finder</h2>
-          <div class="sub">Presented by the DK: Hot, single breweries in your area</div>
-        </div>
-        <div class="status-pill" id="statusPill">Waiting for location</div>
-      </div>
-
-      <div class="controls">
-        <div class="search-wrap">
-          <span class="search-icon">⌕</span>
-          <input
-            id="locationSearch"
-            type="text"
-            placeholder="Search a city, neighborhood, or borough"
-            autocomplete="off"
-          />
-          <div class="suggestions hidden" id="suggestions"></div>
-        </div>
-
-        <div class="control-row">
-          <div class="control-group">
-            <button class="btn btn-primary" id="locateBtn">Use My Location</button>
-            <button class="btn" id="refreshBtn">Refresh</button>
-          </div>
-
-          <div class="control-group">
-            <label class="toggle">
-              <input type="checkbox" id="hideClosedToggle" checked />
-              <span>Hide closed</span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div class="location-line" id="locationLine">Current area: not set</div>
-    </section>
-
-    <main class="content">
-      <section class="map-panel">
-        <div class="map-toolbar">
-          <div>
-            <h3>Map</h3>
-            <p>See nearby breweries and open directions fast.</p>
-          </div>
-        </div>
-        <div id="map"></div>
-      </section>
-
-      <section class="list-panel">
-        <div class="section-head">
-          <div>
-            <h3>Nearby breweries</h3>
-            <p>Tap to call, open Google Maps, visit website, or search Untappd.</p>
-          </div>
-        </div>
-
-        <div class="loading" id="loadingState">Getting breweries near you...</div>
-        <div class="error hidden" id="errorState"></div>
-        <div class="empty hidden" id="emptyState">No breweries matched your filters.</div>
-        <div class="results hidden" id="results"></div>
-      </section>
-    </main>
-
-    <div class="footer-note">
-      Powered by Open Brewery DB + OpenStreetMap. Untappd links use search results based on brewery name and city.
-    </div>
-  </div>
-
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""
-  ></script>
-
-  <script>
-    const state = {
-      breweries: [],
-      filtered: [],
-      userLat: null,
-      userLng: null,
-      userLabel: "not set",
-      hideClosed: true,
-      loading: false,
-      searchResults: []
-    };
-
-    const BREWERY_API_BASE = "https://api.openbrewerydb.org/v1/breweries";
-    const PHOTON_API_BASE = "https://photon.komoot.io/api/";
-
-    const els = {
-      locateBtn: document.getElementById("locateBtn"),
-      refreshBtn: document.getElementById("refreshBtn"),
-      hideClosedToggle: document.getElementById("hideClosedToggle"),
-      statusPill: document.getElementById("statusPill"),
-      locationLine: document.getElementById("locationLine"),
-      loadingState: document.getElementById("loadingState"),
-      errorState: document.getElementById("errorState"),
-      emptyState: document.getElementById("emptyState"),
-      results: document.getElementById("results"),
-      locationSearch: document.getElementById("locationSearch"),
-      suggestions: document.getElementById("suggestions")
-    };
-
-    let map;
-    let userMarker;
-    let breweryMarkers = [];
-    let searchDebounce;
-
-    function initMap() {
-      map = L.map("map", { zoomControl: true }).setView([39.8283, -98.5795], 4);
-
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: "&copy; OpenStreetMap"
-      }).addTo(map);
-    }
-
-    function setLoading(isLoading, text = "Loading...") {
-      state.loading = isLoading;
-      els.loadingState.textContent = text;
-      els.loadingState.classList.toggle("hidden", !isLoading);
-    }
-
-    function setError(message = "") {
-      const hasError = Boolean(message);
-      els.errorState.textContent = message;
-      els.errorState.classList.toggle("hidden", !hasError);
-    }
-
-    function formatPhone(phone) {
-      if (!phone) return "";
-      const digits = phone.replace(/\D/g, "");
-      if (digits.length === 10) {
-        return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-      }
-      if (digits.length === 11 && digits.startsWith("1")) {
-        return `(${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
-      }
-      return phone;
-    }
-
-    function phoneHref(phone) {
-      if (!phone) return null;
-      const digits = phone.replace(/[^\d+]/g, "");
-      return digits ? `tel:${digits}` : null;
-    }
-
-    function cleanUrl(url) {
-      if (!url) return null;
-      if (url.startsWith("http://") || url.startsWith("https://")) return url;
-      return `https://${url}`;
-    }
-
-    function formatType(type) {
-      return (type || "brewery").replace(/_/g, " ");
-    }
-
-    function safeText(value, fallback = "Not available") {
-      return value && String(value).trim() ? String(value).trim() : fallback;
-    }
-
-    function getAddress(b) {
-      return [b.street, b.city, b.state, b.postal_code].filter(Boolean).join(", ");
-    }
-
-    function getMapsLink(b) {
-      const address = getAddress(b);
-      const query = encodeURIComponent(address || `${b.name} brewery`);
-      return `https://www.google.com/maps/search/?api=1&query=${query}`;
-    }
-
-    function getUntappdSearchLink(b) {
-      const query = [b.name, b.city, b.state].filter(Boolean).join(" ");
-      return `https://untappd.com/search?q=${encodeURIComponent(query)}`;
-    }
-
-    function haversineMiles(lat1, lon1, lat2, lon2) {
-      const toRad = deg => (deg * Math.PI) / 180;
-      const R = 3958.8;
-      const dLat = toRad(lat2 - lat1);
-      const dLon = toRad(lon2 - lon1);
-      const a =
-        Math.sin(dLat / 2) ** 2 +
-        Math.cos(toRad(lat1)) *
-          Math.cos(toRad(lat2)) *
-          Math.sin(dLon / 2) ** 2;
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
-    }
-
-    async function reverseGeocode(lat, lng) {
-      try {
-        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
-        const res = await fetch(url, {
-          headers: {
-            Accept: "application/json"
-          }
-        });
-
-        if (!res.ok) throw new Error("Reverse geocode failed");
-
-        const data = await res.json();
-
-        const city =
-          data.address?.city ||
-          data.address?.town ||
-          data.address?.village ||
-          data.address?.hamlet ||
-          data.address?.suburb ||
-          data.address?.borough;
-
-        const stateName = data.address?.state || "";
-
-        if (city && stateName) return `${city}, ${stateName}`;
-        if (city) return city;
-        return `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
-      } catch {
-        return `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
-      }
-    }
-
-    async function searchPlaces(query) {
-      const params = new URLSearchParams({
-        q: query,
-        limit: "8",
-        lang: "en"
-      });
-
-      if (Number.isFinite(state.userLat) && Number.isFinite(state.userLng)) {
-        params.set("lat", String(state.userLat));
-        params.set("lon", String(state.userLng));
-      }
-
-      const res = await fetch(`${PHOTON_API_BASE}?${params.toString()}`, {
-        headers: {
-          Accept: "application/json"
-        }
-      });
-
-      if (!res.ok) {
-        throw new Error("Place search failed");
-      }
-
-      const data = await res.json();
-      const features = Array.isArray(data.features) ? data.features : [];
-
-      const cleaned = features
-        .map(feature => {
-          const props = feature.properties || {};
-          const coords = feature.geometry?.coordinates || [];
-          const lon = Number(coords[0]);
-          const lat = Number(coords[1]);
-
-          const primary =
-            props.name ||
-            props.city ||
-            props.district ||
-            props.suburb ||
-            props.street ||
-            props.county ||
-            props.state;
-
-          const secondaryParts = [
-            props.city && props.city !== primary ? props.city : "",
-            props.district && props.district !== primary ? props.district : "",
-            props.suburb && props.suburb !== primary ? props.suburb : "",
-            props.state || "",
-            props.country || ""
-          ].filter(Boolean);
-
-          const typeLabel =
-            props.osm_value ||
-            props.type ||
-            "place";
-
-          return {
-            label: primary || "Unnamed place",
-            sublabel: secondaryParts.join(" • "),
-            typeLabel,
-            lat,
-            lng: lon
-          };
-        })
-        .filter(item => item.label && Number.isFinite(item.lat) && Number.isFinite(item.lng));
-
-      const seen = new Set();
-      return cleaned.filter(item => {
-        const key = `${item.label}|${item.sublabel}|${item.lat.toFixed(4)}|${item.lng.toFixed(4)}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-    }
-
-    function renderSuggestions(items) {
-      if (!items.length) {
-        els.suggestions.innerHTML = "";
-        els.suggestions.classList.add("hidden");
-        return;
-      }
-
-      els.suggestions.innerHTML = items.map((item, index) => `
-        <button class="suggestion-item" type="button" data-index="${index}">
-          <span class="suggestion-main">${escapeHtml(item.label)}</span>
-          <span class="suggestion-sub">${escapeHtml(item.sublabel || item.typeLabel || "Select this location")}</span>
-        </button>
-      `).join("");
-
-      els.suggestions.classList.remove("hidden");
-    }
-
-    function hideSuggestions() {
-      els.suggestions.classList.add("hidden");
-    }
-
-    async function selectPlace(place) {
-      state.userLat = place.lat;
-      state.userLng = place.lng;
-      state.userLabel = place.sublabel
-        ? `${place.label}, ${place.sublabel.split(" • ")[0]}`
-        : place.label;
-
-      els.locationSearch.value = place.label;
-      state.searchResults = [];
-      hideSuggestions();
-      await loadBreweriesFromCurrentLocation();
-    }
-
-    function isClosed(b) {
-      const status = (b.status || "").toLowerCase();
-      return status.includes("closed");
-    }
-
-    function updateMap() {
-      if (!map) return;
-
-      breweryMarkers.forEach(marker => map.removeLayer(marker));
-      breweryMarkers = [];
-
-      if (state.userLat != null && state.userLng != null) {
-        if (userMarker) {
-          userMarker.setLatLng([state.userLat, state.userLng]);
-        } else {
-          userMarker = L.marker([state.userLat, state.userLng])
-            .addTo(map)
-            .bindPopup("<strong>Selected location</strong>");
-        }
-      }
-
-      const validBreweries = state.filtered.filter(b => {
-        const lat = parseFloat(b.latitude);
-        const lng = parseFloat(b.longitude);
-        return Number.isFinite(lat) && Number.isFinite(lng);
-      });
-
-      validBreweries.forEach(b => {
-        const lat = parseFloat(b.latitude);
-        const lng = parseFloat(b.longitude);
-
-        const marker = L.marker([lat, lng]).addTo(map);
-        marker.bindPopup(`
-          <strong>${escapeHtml(b.name || "Brewery")}</strong><br>
-          ${escapeHtml(getAddress(b) || "Address unavailable")}<br>
-          <a href="${getMapsLink(b)}" target="_blank" rel="noopener noreferrer">Google Maps</a>
-          &nbsp;|&nbsp;
-          <a href="${getUntappdSearchLink(b)}" target="_blank" rel="noopener noreferrer">Untappd</a>
-        `);
-
-        breweryMarkers.push(marker);
-      });
-
-      const bounds = [];
-
-      if (state.userLat != null && state.userLng != null) {
-        bounds.push([state.userLat, state.userLng]);
-      }
-
-      validBreweries.forEach(b => {
-        bounds.push([parseFloat(b.latitude), parseFloat(b.longitude)]);
-      });
-
-      if (bounds.length === 1) {
-        map.setView(bounds[0], 12);
-      } else if (bounds.length > 1) {
-        map.fitBounds(bounds, { padding: [40, 40] });
-      }
-    }
-
-    function applyFilters() {
-      let rows = [...state.breweries];
-
-      if (state.hideClosed) {
-        rows = rows.filter(b => !isClosed(b));
-      }
-
-      if (state.userLat != null && state.userLng != null) {
-        rows = rows
-          .map(b => {
-            const lat = parseFloat(b.latitude);
-            const lng = parseFloat(b.longitude);
-
-            if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-              return { ...b, distanceMiles: null };
-            }
-
-            return {
-              ...b,
-              distanceMiles: haversineMiles(state.userLat, state.userLng, lat, lng)
-            };
-          })
-          .sort((a, b) => {
-            if (a.distanceMiles == null && b.distanceMiles == null) return 0;
-            if (a.distanceMiles == null) return 1;
-            if (b.distanceMiles == null) return -1;
-            return a.distanceMiles - b.distanceMiles;
-          });
-      }
-
-      state.filtered = rows;
-      render();
-      updateMap();
-    }
-
-    function render() {
-      els.locationLine.textContent = `Current area: ${state.userLabel}`;
-
-      const count = state.filtered.length;
-      const hasRows = count > 0;
-
-      els.results.classList.toggle("hidden", !hasRows);
-      els.emptyState.classList.toggle("hidden", hasRows || state.loading);
-
-      if (!hasRows) {
-        els.results.innerHTML = "";
-        return;
-      }
-
-      els.results.innerHTML = state.filtered.map(b => {
-        const address = getAddress(b);
-        const phone = formatPhone(b.phone);
-        const callLink = phoneHref(b.phone);
-        const site = cleanUrl(b.website_url);
-        const mapsLink = getMapsLink(b);
-        const untappdLink = getUntappdSearchLink(b);
-
-        const distanceText =
-          b.distanceMiles == null
-            ? ""
-            : `${b.distanceMiles < 10 ? b.distanceMiles.toFixed(1) : Math.round(b.distanceMiles)} mi away`;
-
-        const websiteBtn = site
-          ? `<a class="action" href="${site}" target="_blank" rel="noopener noreferrer">🌐 Website</a>`
-          : "";
-
-        const callBtn = callLink
-          ? `<a class="action call" href="${callLink}">📞 Call</a>`
-          : `<span class="action" style="opacity:.55; cursor:default;">📞 No phone</span>`;
-
-        return `
-          <article class="card">
-            <div class="card-inner">
-              <div class="card-top">
-                <div class="card-title-wrap">
-                  <h4>${escapeHtml(safeText(b.name))}</h4>
-                  <div class="badges">
-                    <div class="badge type">🍻 ${escapeHtml(formatType(b.brewery_type))}</div>
-                    ${distanceText ? `<div class="badge distance">📍 ${escapeHtml(distanceText)}</div>` : ""}
-                  </div>
-                </div>
-              </div>
-
-              <div class="meta">
-                <div class="meta-row">
-                  <div class="icon">📍</div>
-                  <div class="value ${address ? "" : "muted"}">${escapeHtml(safeText(address))}</div>
-                </div>
-
-                <div class="meta-row">
-                  <div class="icon">🏙️</div>
-                  <div class="value">${escapeHtml(safeText([b.city, b.state].filter(Boolean).join(", ")))}</div>
-                </div>
-
-                <div class="meta-row">
-                  <div class="icon">📞</div>
-                  <div class="value ${phone ? "" : "muted"}">${escapeHtml(safeText(phone))}</div>
-                </div>
-              </div>
-
-              <div class="actions">
-                ${callBtn}
-                <a class="action map" href="${mapsLink}" target="_blank" rel="noopener noreferrer">🗺️ Google Maps</a>
-                <a class="action untappd" href="${untappdLink}" target="_blank" rel="noopener noreferrer">🍺 Untappd</a>
-                ${websiteBtn}
-              </div>
-            </div>
-          </article>
-        `;
-      }).join("");
-    }
-
-    function escapeHtml(value) {
-      return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    async function fetchBreweriesByLocation(lat, lng) {
-      const url = `${BREWERY_API_BASE}?by_dist=${lat},${lng}&per_page=50`;
-      const res = await fetch(url);
-
-      if (!res.ok) {
-        throw new Error("Could not load breweries.");
-      }
-
-      return res.json();
-    }
-
-    async function loadBreweriesFromCurrentLocation() {
-      if (state.userLat == null || state.userLng == null) {
-        setError("Location not set yet. Use your location or search a city.");
-        return;
-      }
-
-      setError("");
-      setLoading(true, "Finding breweries near this location...");
-      els.statusPill.textContent = "Loading breweries";
-
-      try {
-        const rows = await fetchBreweriesByLocation(state.userLat, state.userLng);
-        state.breweries = Array.isArray(rows) ? rows : [];
-        applyFilters();
-        els.statusPill.textContent = `${state.filtered.length} breweries loaded`;
-      } catch (err) {
-        setError(err.message || "Something went wrong while loading breweries.");
-        els.statusPill.textContent = "Load failed";
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    async function locateUser() {
-      if (!navigator.geolocation) {
-        setError("Geolocation is not supported on this device.");
-        return;
-      }
-
-      setError("");
-      setLoading(true, "Getting your location...");
-      els.statusPill.textContent = "Getting location";
-
-      navigator.geolocation.getCurrentPosition(
-        async position => {
-          state.userLat = position.coords.latitude;
-          state.userLng = position.coords.longitude;
-          state.userLabel = await reverseGeocode(state.userLat, state.userLng);
-          els.locationSearch.value = state.userLabel;
-          hideSuggestions();
-          setLoading(false);
-          await loadBreweriesFromCurrentLocation();
-        },
-        error => {
-          setLoading(false);
-          els.statusPill.textContent = "Location blocked";
-          const messageMap = {
-            1: "Location access was denied.",
-            2: "Your location is unavailable.",
-            3: "Location request timed out."
-          };
-          setError(messageMap[error.code] || "Could not get your location.");
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 12000,
-          maximumAge: 300000
-        }
-      );
-    }
-
-    els.hideClosedToggle.addEventListener("change", e => {
-      state.hideClosed = e.target.checked;
-      applyFilters();
-    });
-
-    els.locateBtn.addEventListener("click", locateUser);
-    els.refreshBtn.addEventListener("click", loadBreweriesFromCurrentLocation);
-
-    els.locationSearch.addEventListener("input", () => {
-      const value = els.locationSearch.value.trim();
-
-      clearTimeout(searchDebounce);
-
-      if (value.length < 2) {
-        state.searchResults = [];
-        renderSuggestions([]);
-        return;
-      }
-
-      searchDebounce = setTimeout(async () => {
-        try {
-          els.statusPill.textContent = "Searching places";
-          const places = await searchPlaces(value);
-          state.searchResults = places;
-          renderSuggestions(places);
-          els.statusPill.textContent = places.length ? "Select a location" : "No matches";
-        } catch (err) {
-          console.error(err);
-          state.searchResults = [];
-          renderSuggestions([]);
-          els.statusPill.textContent = "Search failed";
-        }
-      }, 250);
-    });
-
-    els.locationSearch.addEventListener("keydown", e => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        if (state.searchResults.length) {
-          selectPlace(state.searchResults[0]);
-        }
-      }
-    });
-
-    els.suggestions.addEventListener("mousedown", e => {
-      const button = e.target.closest(".suggestion-item");
-      if (!button) return;
-
-      e.preventDefault();
-
-      const index = Number(button.dataset.index);
-      const place = state.searchResults[index];
-      if (place) selectPlace(place);
-    });
-
-    document.addEventListener("click", e => {
-      if (!e.target.closest(".search-wrap")) {
-        hideSuggestions();
-      }
-    });
-
-    initMap();
-    locateUser();
-  </script>
+
+<div class="header">
+<div class="app header-inner">
+
+<img src="IMG_0952.png" class="brand-logo">
+
+<div class="brand-title">Brewery Finder</div>
+
+</div>
+</div>
+
+<div class="app">
+
+<div class="hero">
+
+<h2>Brewery Finder</h2>
+
+<div class="sub">
+Presented by the DK: Hot, single breweries in your area
+</div>
+
+<div class="search">
+
+<input id="searchInput" placeholder="Search a city or neighborhood">
+
+<div id="suggestions" class="suggestions hidden"></div>
+
+</div>
+
+<div class="controls">
+
+<button id="locateBtn">Use My Location</button>
+
+<button id="refreshBtn" class="secondary">Refresh</button>
+
+</div>
+
+</div>
+
+<div class="map">
+<div id="map"></div>
+</div>
+
+<div id="breweryList" class="list"></div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+
+const BREWERY_API="https://api.openbrewerydb.org/v1/breweries"
+const PHOTON="https://photon.komoot.io/api/"
+
+let map=L.map("map").setView([39.8283,-98.5795],4)
+
+L.tileLayer(
+"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+{maxZoom:19}
+).addTo(map)
+
+let userMarker
+let breweryMarkers=[]
+
+const searchInput=document.getElementById("searchInput")
+const suggestions=document.getElementById("suggestions")
+const list=document.getElementById("breweryList")
+
+async function searchPlaces(q){
+
+let res=await fetch(`${PHOTON}?q=${q}&limit=6`)
+let data=await res.json()
+
+return data.features.map(f=>{
+let p=f.properties
+let c=f.geometry.coordinates
+
+return{
+label:p.name||p.city||p.street,
+sub:p.city||p.state||"",
+lat:c[1],
+lng:c[0]
+}
+})
+
+}
+
+searchInput.addEventListener("input",async e=>{
+
+let q=e.target.value.trim()
+
+if(q.length<2){
+suggestions.classList.add("hidden")
+return
+}
+
+let places=await searchPlaces(q)
+
+suggestions.innerHTML=places.map((p,i)=>`
+<div class="suggestion" data-i="${i}">
+${p.label} ${p.sub?`• ${p.sub}`:""}
+</div>
+`).join("")
+
+suggestions.classList.remove("hidden")
+
+suggestions.onclick=ev=>{
+let i=ev.target.dataset.i
+let place=places[i]
+selectLocation(place.lat,place.lng,place.label)
+}
+
+})
+
+async function selectLocation(lat,lng,label){
+
+suggestions.classList.add("hidden")
+
+if(userMarker) map.removeLayer(userMarker)
+
+userMarker=L.marker([lat,lng]).addTo(map)
+
+map.setView([lat,lng],12)
+
+loadBreweries(lat,lng)
+
+}
+
+async function loadBreweries(lat,lng){
+
+let res=await fetch(`${BREWERY_API}?by_dist=${lat},${lng}&per_page=50`)
+let breweries=await res.json()
+
+list.innerHTML=""
+
+breweryMarkers.forEach(m=>map.removeLayer(m))
+breweryMarkers=[]
+
+breweries.forEach(b=>{
+
+let lat=parseFloat(b.latitude)
+let lng=parseFloat(b.longitude)
+
+if(!lat||!lng) return
+
+let marker=L.marker([lat,lng]).addTo(map)
+
+breweryMarkers.push(marker)
+
+let address=[b.street,b.city,b.state].filter(Boolean).join(", ")
+
+let phone=b.phone?`(${b.phone.slice(0,3)}) ${b.phone.slice(3,6)}-${b.phone.slice(6)}`:""
+
+let maps=`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address||b.name)}`
+let untappd=`https://untappd.com/search?q=${encodeURIComponent(b.name)}`
+
+list.innerHTML+=`
+
+<div class="card">
+
+<h3>${b.name}</h3>
+
+<div class="meta">${address}</div>
+
+<div class="meta">${phone}</div>
+
+<div class="actions">
+
+<a class="action call" href="tel:${b.phone||""}">Call</a>
+
+<a class="action maps" href="${maps}" target="_blank">Google Maps</a>
+
+<a class="action untappd" href="${untappd}" target="_blank">Untappd</a>
+
+</div>
+
+</div>
+
+`
+
+})
+
+}
+
+document.getElementById("locateBtn").onclick=()=>{
+
+navigator.geolocation.getCurrentPosition(pos=>{
+
+let lat=pos.coords.latitude
+let lng=pos.coords.longitude
+
+selectLocation(lat,lng,"My location")
+
+})
+
+}
+
+</script>
+
 </body>
 </html>
