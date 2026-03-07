@@ -1,23 +1,14 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Brewery Finder</title>
-  <meta
-    name="description"
-    content="Find breweries near you with map, Google Maps, website, and Untappd links."
-  />
+  <meta name="description" content="Find breweries near you with map, Google Maps, website, and Untappd links." />
 
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""
-  />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
   <style>
     :root {
@@ -39,598 +30,392 @@
       --maxw: 960px;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     html, body {
-      margin: 0;
-      padding: 0;
-      min-height: 100%;
+      margin: 0; padding: 0; min-height: 100%;
       background:
         radial-gradient(circle at top left, rgba(34, 197, 94, 0.20), transparent 30%),
         radial-gradient(circle at top right, rgba(96, 165, 250, 0.16), transparent 24%),
         linear-gradient(180deg, #071019 0%, #0b1220 100%);
       color: var(--text);
-      font-family:
-        Inter,
-        ui-sans-serif,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        Roboto,
-        sans-serif;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    button, input {
-      font: inherit;
-    }
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
 
     .app-shell {
-      width: 100%;
-      max-width: var(--maxw);
-      margin: 0 auto;
-      padding: 0 14px 28px;
+      width: 100%; max-width: var(--maxw);
+      margin: 0 auto; padding: 0 14px 28px;
     }
 
     .pinned-brand {
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      position: sticky; top: 0; z-index: 100;
       padding-top: max(10px, env(safe-area-inset-top));
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      background: linear-gradient(
-        180deg,
-        rgba(8, 16, 24, 0.96) 0%,
-        rgba(8, 16, 24, 0.86) 72%,
-        rgba(8, 16, 24, 0) 100%
-      );
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      background: linear-gradient(180deg, rgba(8,16,24,0.96) 0%, rgba(8,16,24,0.86) 72%, rgba(8,16,24,0) 100%);
     }
 
     .pinned-brand-inner {
-      display: flex;
-      align-items: center;
-      gap: 12px;
+      display: flex; align-items: center; gap: 12px;
       padding: 10px 2px 14px;
     }
 
     .brand-mark {
-      width: 52px;
-      height: 52px;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(135deg, rgba(34, 197, 94, 0.22), rgba(96, 165, 250, 0.18));
-      border: 1px solid rgba(255,255,255,0.08);
-      flex-shrink: 0;
-      overflow: hidden;
+      width: 52px; height: 52px; border-radius: 14px;
+      display: grid; place-items: center;
+      background: linear-gradient(135deg, rgba(34,197,94,0.22), rgba(96,165,250,0.18));
+      border: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; overflow: hidden;
     }
 
-    .brand-logo {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-    }
+    .brand-logo { width: 100%; height: 100%; object-fit: contain; display: block; }
 
     .brand-title {
-      margin: 0;
-      font-size: clamp(24px, 4vw, 32px);
-      line-height: 1;
-      letter-spacing: -0.03em;
+      margin: 0; font-size: clamp(24px, 4vw, 32px);
+      line-height: 1; letter-spacing: -0.03em;
     }
 
     .hero {
-      border: 1px solid var(--line);
-      border-radius: var(--radius-xl);
+      border: 1px solid var(--line); border-radius: var(--radius-xl);
       padding: 18px;
-      background: linear-gradient(
-        145deg,
-        rgba(15, 23, 42, 0.96),
-        rgba(15, 23, 42, 0.74)
-      );
-      box-shadow: var(--shadow);
-      margin-top: 4px;
+      background: linear-gradient(145deg, rgba(15,23,42,0.96), rgba(15,23,42,0.74));
+      box-shadow: var(--shadow); margin-top: 4px;
     }
 
     .hero-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 16px;
+      display: flex; justify-content: space-between;
+      align-items: flex-start; gap: 16px;
     }
 
-    .hero-copy h2 {
-      margin: 0;
-      font-size: 24px;
-      line-height: 1.05;
-      letter-spacing: -0.03em;
-    }
-
-    .sub {
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: 14px;
-    }
+    .hero-copy h2 { margin: 0; font-size: 24px; line-height: 1.05; letter-spacing: -0.03em; }
+    .sub { margin-top: 8px; color: var(--muted); font-size: 14px; }
 
     .status-pill {
       flex-shrink: 0;
-      border: 1px solid rgba(34, 197, 94, 0.25);
-      background: rgba(34, 197, 94, 0.12);
-      color: #bbf7d0;
-      padding: 10px 12px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      white-space: nowrap;
+      border: 1px solid rgba(34,197,94,0.25);
+      background: rgba(34,197,94,0.12); color: #bbf7d0;
+      padding: 10px 12px; border-radius: 999px;
+      font-size: 12px; font-weight: 700; white-space: nowrap;
     }
 
-    .controls {
-      margin-top: 16px;
-      display: grid;
-      gap: 12px;
-    }
+    .controls { margin-top: 16px; display: grid; gap: 12px; }
 
-    .search-wrap {
-      position: relative;
-      z-index: 200;
-    }
+    .search-wrap { position: relative; z-index: 200; }
 
     .search-wrap input {
-      width: 100%;
-      border: 1px solid var(--line);
-      background: rgba(2, 6, 23, 0.62);
-      color: var(--text);
-      border-radius: 16px;
-      padding: 15px 52px 15px 46px;
-      outline: none;
-      transition: border-color 0.2s ease, transform 0.2s ease;
+      width: 100%; border: 1px solid var(--line);
+      background: rgba(2,6,23,0.62); color: var(--text);
+      border-radius: 16px; padding: 15px 52px 15px 46px;
+      outline: none; transition: border-color 0.2s ease, transform 0.2s ease;
     }
 
     .search-wrap input:focus {
-      border-color: rgba(34, 197, 94, 0.45);
-      transform: translateY(-1px);
+      border-color: rgba(34,197,94,0.45); transform: translateY(-1px);
     }
 
     .search-icon {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--muted);
-      pointer-events: none;
+      position: absolute; left: 16px; top: 50%;
+      transform: translateY(-50%); color: var(--muted); pointer-events: none;
     }
 
     .clear-search-btn {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 28px;
-      height: 28px;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.22);
-      background: rgba(15, 23, 42, 0.95);
-      color: var(--muted);
-      display: grid;
-      place-items: center;
-      cursor: pointer;
-      padding: 0;
-      line-height: 1;
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      width: 28px; height: 28px; border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.22);
+      background: rgba(15,23,42,0.95); color: var(--muted);
+      display: grid; place-items: center; cursor: pointer; padding: 0; line-height: 1;
     }
 
     .clear-search-btn:hover {
-      color: var(--text);
-      border-color: rgba(255,255,255,0.24);
-      background: rgba(30, 41, 59, 0.95);
-      transform: translateY(-50%);
+      color: var(--text); border-color: rgba(255,255,255,0.24);
+      background: rgba(30,41,59,0.95); transform: translateY(-50%);
     }
 
     .suggestions {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: calc(100% + 8px);
-      background: rgba(15, 23, 42, 0.98);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      z-index: 300;
-      max-height: 320px;
-      overflow-y: auto;
+      position: absolute; left: 0; right: 0; top: calc(100% + 8px);
+      background: rgba(15,23,42,0.98); border: 1px solid var(--line);
+      border-radius: 16px; box-shadow: var(--shadow);
+      overflow: hidden; z-index: 300; max-height: 320px; overflow-y: auto;
     }
 
     .suggestion-item {
-      width: 100%;
-      border: none;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.12);
-      background: transparent;
-      color: var(--text);
-      text-align: left;
-      padding: 14px 16px;
-      cursor: pointer;
+      width: 100%; border: none;
+      border-bottom: 1px solid rgba(148,163,184,0.12);
+      background: transparent; color: var(--text);
+      text-align: left; padding: 14px 16px; cursor: pointer;
     }
 
-    .suggestion-item:last-child {
-      border-bottom: none;
-    }
-
-    .suggestion-item:hover {
-      background: rgba(30, 41, 59, 0.85);
-    }
-
-    .suggestion-main {
-      display: block;
-      font-weight: 700;
-    }
-
-    .suggestion-sub {
-      display: block;
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 4px;
-    }
+    .suggestion-item:last-child { border-bottom: none; }
+    .suggestion-item:hover { background: rgba(30,41,59,0.85); }
+    .suggestion-main { display: block; font-weight: 700; }
+    .suggestion-sub { display: block; color: var(--muted); font-size: 13px; margin-top: 4px; }
 
     .control-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
+      display: flex; flex-wrap: wrap;
+      justify-content: space-between; align-items: center; gap: 10px;
     }
 
-    .control-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-    }
+    .control-group { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 
     .btn {
-      border: 1px solid var(--line);
-      background: rgba(15, 23, 42, 0.78);
-      color: var(--text);
-      padding: 11px 14px;
-      border-radius: 14px;
-      cursor: pointer;
-      transition: transform 0.18s ease, border-color 0.18s ease;
+      border: 1px solid var(--line); background: rgba(15,23,42,0.78);
+      color: var(--text); padding: 11px 14px; border-radius: 14px;
+      cursor: pointer; transition: transform 0.18s ease, border-color 0.18s ease;
     }
 
-    .btn:hover {
-      transform: translateY(-1px);
-      border-color: rgba(255,255,255,0.2);
-    }
+    .btn:hover { transform: translateY(-1px); border-color: rgba(255,255,255,0.2); }
 
     .btn-primary {
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #052e16;
-      border: none;
-      font-weight: 800;
+      color: #052e16; border: none; font-weight: 800;
     }
 
     .toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 11px 14px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(15, 23, 42, 0.78);
-      color: var(--text);
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 11px 14px; border-radius: 14px;
+      border: 1px solid var(--line); background: rgba(15,23,42,0.78); color: var(--text);
     }
 
-    .toggle input {
-      accent-color: var(--accent);
-      width: 16px;
-      height: 16px;
-      margin: 0;
+    .toggle input { accent-color: var(--accent); width: 16px; height: 16px; margin: 0; }
+
+    /* ── Radius Slider ── */
+    .radius-wrap {
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 14px; border-radius: 14px;
+      border: 1px solid var(--line); background: rgba(15,23,42,0.78);
     }
 
-    .location-line {
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 14px;
+    .radius-label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+    .radius-value {
+      font-size: 13px; font-weight: 700; color: #bbf7d0;
+      white-space: nowrap; min-width: 48px; text-align: right;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none; appearance: none;
+      width: 100px; height: 4px; border-radius: 999px;
+      background: linear-gradient(to right, var(--accent) var(--pct, 50%), rgba(148,163,184,0.2) var(--pct, 50%));
+      outline: none; cursor: pointer; flex-shrink: 0;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 16px; height: 16px;
+      border-radius: 999px; background: var(--accent);
+      border: 2px solid #052e16; box-shadow: 0 0 6px rgba(34,197,94,0.5);
+      transition: transform 0.15s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+    input[type="range"]::-moz-range-thumb {
+      width: 16px; height: 16px; border-radius: 999px;
+      background: var(--accent); border: 2px solid #052e16;
+    }
+
+    /* ── Sort Select ── */
+    .sort-wrap {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 14px; border-radius: 14px;
+      border: 1px solid var(--line); background: rgba(15,23,42,0.78);
+    }
+
+    .sort-wrap label { font-size: 13px; color: var(--muted); white-space: nowrap; }
+
+    .sort-wrap select {
+      background: transparent; border: none; color: var(--text);
+      outline: none; cursor: pointer; font-size: 13px; font-weight: 700;
+      padding-right: 4px;
+    }
+
+    .sort-wrap select option { background: #0f172a; }
+
+    .location-line { margin-top: 12px; color: var(--muted); font-size: 14px; }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex; gap: 6px; margin-bottom: 2px;
+      border-bottom: 1px solid var(--line); padding-bottom: 0;
+    }
+
+    .tab-btn {
+      background: none; border: none; color: var(--muted);
+      padding: 10px 14px 12px; font-size: 14px; font-weight: 600;
+      cursor: pointer; border-bottom: 2px solid transparent;
+      margin-bottom: -1px; transition: color 0.18s, border-color 0.18s;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .tab-btn:hover { color: var(--text); }
+
+    .tab-btn.active {
+      color: var(--accent); border-bottom-color: var(--accent);
+    }
+
+    .tab-badge {
+      background: rgba(34,197,94,0.18); color: #bbf7d0;
+      border-radius: 999px; padding: 2px 7px; font-size: 11px; font-weight: 700;
+    }
+
+    .tab-badge.amber {
+      background: rgba(245,158,11,0.18); color: #fde68a;
     }
 
     .content {
-      padding-top: 18px;
-      display: grid;
-      gap: 16px;
+      padding-top: 18px; display: grid; gap: 16px;
     }
 
     .map-panel {
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      overflow: hidden;
-      background: rgba(15, 23, 42, 0.72);
-      box-shadow: var(--shadow);
+      border: 1px solid var(--line); border-radius: 22px;
+      overflow: hidden; background: rgba(15,23,42,0.72); box-shadow: var(--shadow);
     }
 
     .map-toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(2, 6, 23, 0.36);
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line);
+      background: rgba(2,6,23,0.36);
     }
 
-    .map-toolbar h3 {
-      margin: 0;
-      font-size: 18px;
-      letter-spacing: -0.02em;
-    }
+    .map-toolbar h3 { margin: 0; font-size: 18px; letter-spacing: -0.02em; }
+    .map-toolbar p { margin: 4px 0 0; font-size: 13px; color: var(--muted); }
 
-    .map-toolbar p {
-      margin: 4px 0 0;
-      font-size: 13px;
-      color: var(--muted);
-    }
+    #map { width: 100%; height: 320px; background: #0f172a; }
 
-    #map {
-      width: 100%;
-      height: 320px;
-      background: #0f172a;
-    }
+    .list-panel { display: grid; gap: 14px; }
 
-    .list-panel {
-      display: grid;
-      gap: 14px;
-    }
+    .section-head h3 { margin: 0; font-size: 20px; letter-spacing: -0.02em; }
+    .section-head p { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
 
-    .section-head h3 {
-      margin: 0;
-      font-size: 20px;
-      letter-spacing: -0.02em;
-    }
-
-    .section-head p {
-      margin: 4px 0 0;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    .results {
-      display: grid;
-      gap: 14px;
-    }
+    .results { display: grid; gap: 14px; }
 
     .card {
-      border: 1px solid var(--line);
-      border-radius: 22px;
+      border: 1px solid var(--line); border-radius: 22px;
       background:
-        linear-gradient(180deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.84)),
-        linear-gradient(135deg, rgba(34, 197, 94, 0.08), transparent 40%);
-      box-shadow: var(--shadow);
-      transition: transform 0.2s ease, border-color 0.2s ease;
+        linear-gradient(180deg, rgba(15,23,42,0.96), rgba(15,23,42,0.84)),
+        linear-gradient(135deg, rgba(34,197,94,0.08), transparent 40%);
+      box-shadow: var(--shadow); transition: transform 0.2s ease, border-color 0.2s ease;
     }
 
-    .card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(34, 197, 94, 0.25);
-    }
+    .card:hover { transform: translateY(-2px); border-color: rgba(34,197,94,0.25); }
+    .card.is-favorite { border-color: rgba(245,158,11,0.35); }
 
-    .card-inner {
-      padding: 18px;
-    }
+    .card-inner { padding: 18px; }
 
     .card-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 14px;
+      display: flex; justify-content: space-between;
+      align-items: flex-start; gap: 14px;
     }
 
-    .card-title-wrap {
-      min-width: 0;
+    .card-title-wrap { min-width: 0; flex: 1; }
+
+    .card h4 { margin: 0; font-size: 21px; line-height: 1.1; letter-spacing: -0.02em; }
+
+    .fav-btn {
+      background: none; border: 1px solid rgba(148,163,184,0.18);
+      border-radius: 12px; padding: 8px 10px; cursor: pointer;
+      font-size: 18px; line-height: 1; color: var(--muted);
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+      flex-shrink: 0;
     }
 
-    .card h4 {
-      margin: 0;
-      font-size: 21px;
-      line-height: 1.1;
-      letter-spacing: -0.02em;
+    .fav-btn:hover { transform: scale(1.15); border-color: rgba(245,158,11,0.4); }
+    .fav-btn.active {
+      color: var(--amber); border-color: rgba(245,158,11,0.45);
+      background: rgba(245,158,11,0.1);
     }
 
     .badges {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;
     }
 
     .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      border: 1px solid transparent;
-      text-transform: capitalize;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 7px 10px; border-radius: 999px;
+      font-size: 12px; font-weight: 700; border: 1px solid transparent; text-transform: capitalize;
     }
 
-    .badge.type {
-      background: rgba(96, 165, 250, 0.14);
-      color: #bfdbfe;
-      border-color: rgba(96, 165, 250, 0.2);
-    }
+    .badge.type { background: rgba(96,165,250,0.14); color: #bfdbfe; border-color: rgba(96,165,250,0.2); }
+    .badge.distance { background: rgba(34,197,94,0.14); color: #bbf7d0; border-color: rgba(34,197,94,0.2); white-space: nowrap; }
 
-    .badge.distance {
-      background: rgba(34, 197, 94, 0.14);
-      color: #bbf7d0;
-      border-color: rgba(34, 197, 94, 0.2);
-      white-space: nowrap;
-    }
+    .meta { display: grid; gap: 10px; margin-top: 16px; }
 
-    .meta {
-      display: grid;
-      gap: 10px;
-      margin-top: 16px;
-    }
+    .meta-row { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
 
-    .meta-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      min-width: 0;
-    }
+    .icon { width: 18px; flex-shrink: 0; text-align: center; color: var(--muted); margin-top: 1px; }
+    .value { min-width: 0; word-break: break-word; }
+    .muted { color: var(--muted); }
 
-    .icon {
-      width: 18px;
-      flex-shrink: 0;
-      text-align: center;
-      color: var(--muted);
-      margin-top: 1px;
-    }
-
-    .value {
-      min-width: 0;
-      word-break: break-word;
-    }
-
-    .muted {
-      color: var(--muted);
-    }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 18px;
-    }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 
     .action {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      min-height: 44px;
-      padding: 11px 14px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: rgba(15, 23, 42, 0.68);
-      color: var(--text);
-      font-weight: 700;
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 8px; min-height: 44px; padding: 11px 14px;
+      border-radius: 14px; border: 1px solid var(--line);
+      background: rgba(15,23,42,0.68); color: var(--text); font-weight: 700;
       transition: transform 0.18s ease, border-color 0.18s ease;
     }
 
-    .action:hover {
-      transform: translateY(-1px);
-      border-color: rgba(255,255,255,0.2);
-    }
+    .action:hover { transform: translateY(-1px); border-color: rgba(255,255,255,0.2); }
 
     .action.call {
-      background: linear-gradient(135deg, rgba(34, 197, 94, 0.18), rgba(34, 197, 94, 0.1));
-      border-color: rgba(34, 197, 94, 0.28);
-      color: #dcfce7;
+      background: linear-gradient(135deg, rgba(34,197,94,0.18), rgba(34,197,94,0.1));
+      border-color: rgba(34,197,94,0.28); color: #dcfce7;
     }
 
     .action.map {
-      background: linear-gradient(135deg, rgba(96, 165, 250, 0.16), rgba(96, 165, 250, 0.08));
-      border-color: rgba(96, 165, 250, 0.22);
-      color: #dbeafe;
+      background: linear-gradient(135deg, rgba(96,165,250,0.16), rgba(96,165,250,0.08));
+      border-color: rgba(96,165,250,0.22); color: #dbeafe;
     }
 
     .action.untappd {
-      background: linear-gradient(135deg, rgba(245, 158, 11, 0.18), rgba(245, 158, 11, 0.08));
-      border-color: rgba(245, 158, 11, 0.22);
-      color: #fde68a;
+      background: linear-gradient(135deg, rgba(245,158,11,0.18), rgba(245,158,11,0.08));
+      border-color: rgba(245,158,11,0.22); color: #fde68a;
     }
 
-    .loading,
-    .error,
-    .empty {
-      border: 1px solid var(--line);
-      border-radius: 22px;
-      padding: 26px 18px;
-      background: rgba(15, 23, 42, 0.7);
-      color: var(--muted);
-      text-align: center;
+    .loading, .error, .empty {
+      border: 1px solid var(--line); border-radius: 22px;
+      padding: 26px 18px; background: rgba(15,23,42,0.7);
+      color: var(--muted); text-align: center;
     }
 
-    .error {
-      color: #fecaca;
-      border-color: rgba(239, 68, 68, 0.22);
-      background: rgba(127, 29, 29, 0.18);
+    .error { color: #fecaca; border-color: rgba(239,68,68,0.22); background: rgba(127,29,29,0.18); }
+
+    /* Favorites empty state */
+    .favs-empty {
+      border: 1px dashed rgba(245,158,11,0.25); border-radius: 22px;
+      padding: 40px 18px; background: rgba(245,158,11,0.04);
+      color: var(--muted); text-align: center;
     }
 
-    .hidden {
-      display: none !important;
-    }
+    .favs-empty-icon { font-size: 36px; margin-bottom: 12px; }
+    .favs-empty p { margin: 6px 0 0; font-size: 14px; }
+
+    .hidden { display: none !important; }
 
     .footer-note {
-      text-align: center;
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 8px;
-      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      text-align: center; color: var(--muted); font-size: 12px;
+      margin-top: 8px; padding-bottom: max(12px, env(safe-area-inset-bottom));
     }
 
     @media (min-width: 960px) {
-      .content {
-        grid-template-columns: 1.02fr 1.18fr;
-        align-items: start;
-      }
-
-      .map-panel {
-        position: sticky;
-        top: 86px;
-      }
-
-      #map {
-        height: 560px;
-      }
+      .content { grid-template-columns: 1.02fr 1.18fr; align-items: start; }
+      .map-panel { position: sticky; top: 86px; }
+      #map { height: 560px; }
     }
 
     @media (max-width: 720px) {
-      .hero {
-        padding: 16px;
-        border-radius: 20px;
-      }
-
-      .hero-top {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .status-pill {
-        align-self: flex-start;
-      }
-
-      .card-inner {
-        padding: 16px;
-      }
-
-      .card-top {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .actions {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .actions .action:last-child:nth-child(odd) {
-        grid-column: span 2;
-      }
-
-      #map {
-        height: 260px;
-      }
+      .hero { padding: 16px; border-radius: 20px; }
+      .hero-top { flex-direction: column; align-items: stretch; }
+      .status-pill { align-self: flex-start; }
+      .card-inner { padding: 16px; }
+      .card-top { flex-direction: column; align-items: flex-start; }
+      .fav-btn { align-self: flex-end; margin-top: -36px; }
+      .actions { display: grid; grid-template-columns: 1fr 1fr; }
+      .actions .action:last-child:nth-child(odd) { grid-column: span 2; }
+      #map { height: 260px; }
+      input[type="range"] { width: 80px; }
     }
   </style>
+
 </head>
 <body>
   <div class="app-shell">
@@ -643,92 +428,119 @@
       </div>
     </div>
 
-    <section class="hero">
-      <div class="hero-top">
-        <div class="hero-copy">
-          <h2>Brewery Finder</h2>
-          <div class="sub">Presented by the DK: Hot, single breweries in your area</div>
-        </div>
-        <div class="status-pill" id="statusPill">Waiting for location</div>
+```
+<section class="hero">
+  <div class="hero-top">
+    <div class="hero-copy">
+      <h2>Brewery Finder</h2>
+      <div class="sub">Presented by the DK: Hot, single breweries in your area</div>
+    </div>
+    <div class="status-pill" id="statusPill">Waiting for location</div>
+  </div>
+
+  <div class="controls">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input id="locationSearch" type="text"
+        placeholder="Search a city, neighborhood, or borough" autocomplete="off" />
+      <button type="button" id="clearSearchBtn" class="clear-search-btn hidden"
+        aria-label="Clear search" title="Clear search">×</button>
+      <div class="suggestions hidden" id="suggestions"></div>
+    </div>
+
+    <div class="control-row">
+      <div class="control-group">
+        <button class="btn btn-primary" id="locateBtn">Use My Location</button>
+        <button class="btn" id="refreshBtn">Refresh</button>
       </div>
+      <div class="control-group">
+        <label class="toggle">
+          <input type="checkbox" id="hideClosedToggle" checked />
+          <span>Hide closed</span>
+        </label>
+      </div>
+    </div>
 
-      <div class="controls">
-        <div class="search-wrap">
-          <span class="search-icon">⌕</span>
-          <input
-            id="locationSearch"
-            type="text"
-            placeholder="Search a city, neighborhood, or borough"
-            autocomplete="off"
-          />
-          <button
-            type="button"
-            id="clearSearchBtn"
-            class="clear-search-btn hidden"
-            aria-label="Clear search"
-            title="Clear search"
-          >
-            ×
-          </button>
-          <div class="suggestions hidden" id="suggestions"></div>
+    <!-- New controls row: radius + sort -->
+    <div class="control-row">
+      <div class="control-group">
+        <div class="radius-wrap">
+          <span class="radius-label">Radius</span>
+          <input type="range" id="radiusSlider" min="1" max="100" value="25" step="1" />
+          <span class="radius-value" id="radiusDisplay">25 mi</span>
         </div>
 
-        <div class="control-row">
-          <div class="control-group">
-            <button class="btn btn-primary" id="locateBtn">Use My Location</button>
-            <button class="btn" id="refreshBtn">Refresh</button>
-          </div>
-
-          <div class="control-group">
-            <label class="toggle">
-              <input type="checkbox" id="hideClosedToggle" checked />
-              <span>Hide closed</span>
-            </label>
-          </div>
+        <div class="sort-wrap">
+          <label for="sortSelect">Sort</label>
+          <select id="sortSelect">
+            <option value="distance">Nearest first</option>
+            <option value="name">A → Z</option>
+            <option value="name-desc">Z → A</option>
+          </select>
         </div>
       </div>
-
-      <div class="location-line" id="locationLine">Current area: not set</div>
-    </section>
-
-    <main class="content">
-      <section class="map-panel">
-        <div class="map-toolbar">
-          <div>
-            <h3>Map</h3>
-            <p>See nearby breweries and open directions fast.</p>
-          </div>
-        </div>
-        <div id="map"></div>
-      </section>
-
-      <section class="list-panel">
-        <div class="section-head">
-          <div>
-            <h3>Nearby breweries</h3>
-            <p>Tap to call, open Google Maps, visit website, or search Untappd.</p>
-          </div>
-        </div>
-
-        <div class="loading" id="loadingState">Getting breweries near you...</div>
-        <div class="error hidden" id="errorState"></div>
-        <div class="empty hidden" id="emptyState">No breweries matched your filters.</div>
-        <div class="results hidden" id="results"></div>
-      </section>
-    </main>
-
-    <div class="footer-note">
-      Powered by Open Brewery DB + OpenStreetMap. Untappd links use search results based on brewery name and city.
     </div>
   </div>
 
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""
-  ></script>
+  <div class="location-line" id="locationLine">Current area: not set</div>
+</section>
+
+<main class="content">
+  <section class="map-panel">
+    <div class="map-toolbar">
+      <div>
+        <h3>Map</h3>
+        <p>See nearby breweries and open directions fast.</p>
+      </div>
+    </div>
+    <div id="map"></div>
+  </section>
+
+  <section class="list-panel">
+    <div class="section-head">
+      <div>
+        <h3>Nearby breweries</h3>
+        <p>Tap to call, open Google Maps, visit website, or search Untappd.</p>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" id="tabNearby" data-tab="nearby">
+        🗺️ Nearby
+        <span class="tab-badge" id="nearbyCount">0</span>
+      </button>
+      <button class="tab-btn" id="tabFavs" data-tab="favs">
+        ⭐ Favorites
+        <span class="tab-badge amber" id="favsCount">0</span>
+      </button>
+    </div>
+
+    <div id="nearbyPane">
+      <div class="loading" id="loadingState">Getting breweries near you...</div>
+      <div class="error hidden" id="errorState"></div>
+      <div class="empty hidden" id="emptyState">No breweries matched your filters.</div>
+      <div class="results hidden" id="results"></div>
+    </div>
+
+    <div id="favsPane" class="hidden">
+      <div class="results" id="favsResults"></div>
+    </div>
+  </section>
+</main>
+
+<div class="footer-note">
+  Powered by Open Brewery DB + OpenStreetMap. Untappd links use search results based on brewery name and city.
+</div>
+```
+
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <script>
+    // ── State ──────────────────────────────────────────────────────────────────
     const state = {
       breweries: [],
       filtered: [],
@@ -736,42 +548,78 @@
       userLng: null,
       userLabel: "not set",
       hideClosed: true,
+      radiusMiles: 25,
+      sortMode: "distance",
       loading: false,
-      searchResults: []
+      fetchInFlight: false,
+      searchResults: [],
+      favorites: loadFavorites(),
+      activeTab: "nearby"
     };
 
     const BREWERY_API_BASE = "https://api.openbrewerydb.org/v1/breweries";
-    const PHOTON_API_BASE = "https://photon.komoot.io/api/";
+    const PHOTON_API_BASE  = "https://photon.komoot.io/api/";
 
     const els = {
-      locateBtn: document.getElementById("locateBtn"),
-      refreshBtn: document.getElementById("refreshBtn"),
+      locateBtn:        document.getElementById("locateBtn"),
+      refreshBtn:       document.getElementById("refreshBtn"),
       hideClosedToggle: document.getElementById("hideClosedToggle"),
-      statusPill: document.getElementById("statusPill"),
-      locationLine: document.getElementById("locationLine"),
-      loadingState: document.getElementById("loadingState"),
-      errorState: document.getElementById("errorState"),
-      emptyState: document.getElementById("emptyState"),
-      results: document.getElementById("results"),
-      locationSearch: document.getElementById("locationSearch"),
-      clearSearchBtn: document.getElementById("clearSearchBtn"),
-      suggestions: document.getElementById("suggestions")
+      statusPill:       document.getElementById("statusPill"),
+      locationLine:     document.getElementById("locationLine"),
+      loadingState:     document.getElementById("loadingState"),
+      errorState:       document.getElementById("errorState"),
+      emptyState:       document.getElementById("emptyState"),
+      results:          document.getElementById("results"),
+      locationSearch:   document.getElementById("locationSearch"),
+      clearSearchBtn:   document.getElementById("clearSearchBtn"),
+      suggestions:      document.getElementById("suggestions"),
+      radiusSlider:     document.getElementById("radiusSlider"),
+      radiusDisplay:    document.getElementById("radiusDisplay"),
+      sortSelect:       document.getElementById("sortSelect"),
+      tabNearby:        document.getElementById("tabNearby"),
+      tabFavs:          document.getElementById("tabFavs"),
+      nearbyPane:       document.getElementById("nearbyPane"),
+      favsPane:         document.getElementById("favsPane"),
+      nearbyCount:      document.getElementById("nearbyCount"),
+      favsCount:        document.getElementById("favsCount"),
+      favsResults:      document.getElementById("favsResults")
     };
 
-    let map;
-    let userMarker;
-    let breweryMarkers = [];
-    let searchDebounce;
+    let map, userMarker, breweryMarkers = [], searchDebounce;
 
+    // ── Favorites persistence ──────────────────────────────────────────────────
+    function loadFavorites() {
+      try {
+        return new Set(JSON.parse(localStorage.getItem("bf_favorites") || "[]"));
+      } catch { return new Set(); }
+    }
+
+    function saveFavorites() {
+      try {
+        localStorage.setItem("bf_favorites", JSON.stringify([...state.favorites]));
+      } catch {}
+    }
+
+    function toggleFavorite(id) {
+      if (state.favorites.has(id)) {
+        state.favorites.delete(id);
+      } else {
+        state.favorites.add(id);
+      }
+      saveFavorites();
+      render();
+    }
+
+    // ── Map ────────────────────────────────────────────────────────────────────
     function initMap() {
       map = L.map("map", { zoomControl: true }).setView([39.8283, -98.5795], 4);
-
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         attribution: "&copy; OpenStreetMap"
       }).addTo(map);
     }
 
+    // ── UI helpers ─────────────────────────────────────────────────────────────
     function setLoading(isLoading, text = "Loading...") {
       state.loading = isLoading;
       els.loadingState.textContent = text;
@@ -785,241 +633,298 @@
     }
 
     function updateClearSearchButton() {
-      const hasText = els.locationSearch.value.trim().length > 0;
-      els.clearSearchBtn.classList.toggle("hidden", !hasText);
+      els.clearSearchBtn.classList.toggle("hidden", !els.locationSearch.value.trim().length);
     }
 
+    function updateRadiusSlider() {
+      const min = Number(els.radiusSlider.min);
+      const max = Number(els.radiusSlider.max);
+      const val = Number(els.radiusSlider.value);
+      const pct = ((val - min) / (max - min)) * 100;
+      els.radiusSlider.style.setProperty("--pct", `${pct}%`);
+      els.radiusDisplay.textContent = val === 100 ? "Any" : `${val} mi`;
+    }
+
+    // ── Formatters ─────────────────────────────────────────────────────────────
     function formatPhone(phone) {
       if (!phone) return "";
-      const digits = phone.replace(/\D/g, "");
-      if (digits.length === 10) {
-        return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-      }
-      if (digits.length === 11 && digits.startsWith("1")) {
-        return `(${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
-      }
+      const d = phone.replace(/\D/g, "");
+      if (d.length === 10) return `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
+      if (d.length === 11 && d.startsWith("1")) return `(${d.slice(1,4)}) ${d.slice(4,7)}-${d.slice(7)}`;
       return phone;
     }
 
     function phoneHref(phone) {
       if (!phone) return null;
-      const digits = phone.replace(/[^\d+]/g, "");
-      return digits ? `tel:${digits}` : null;
+      const d = phone.replace(/[^\d+]/g, "");
+      return d ? `tel:${d}` : null;
     }
 
     function cleanUrl(url) {
       if (!url) return null;
-      if (url.startsWith("http://") || url.startsWith("https://")) return url;
-      return `https://${url}`;
+      return url.startsWith("http") ? url : `https://${url}`;
     }
 
-    function formatType(type) {
-      return (type || "brewery").replace(/_/g, " ");
-    }
-
+    function formatType(type) { return (type || "brewery").replace(/_/g, " "); }
     function safeText(value, fallback = "Not available") {
       return value && String(value).trim() ? String(value).trim() : fallback;
     }
-
     function getAddress(b) {
       return [b.street, b.city, b.state, b.postal_code].filter(Boolean).join(", ");
     }
-
     function getMapsLink(b) {
-      const address = getAddress(b);
-      const query = encodeURIComponent(address || `${b.name} brewery`);
-      return `https://www.google.com/maps/search/?api=1&query=${query}`;
+      const q = encodeURIComponent(getAddress(b) || `${b.name} brewery`);
+      return `https://www.google.com/maps/search/?api=1&query=${q}`;
     }
-
     function getUntappdSearchLink(b) {
-      const query = [b.name, b.city, b.state].filter(Boolean).join(" ");
-      return `https://untappd.com/search?q=${encodeURIComponent(query)}`;
+      const q = [b.name, b.city, b.state].filter(Boolean).join(" ");
+      return `https://untappd.com/search?q=${encodeURIComponent(q)}`;
     }
-
     function haversineMiles(lat1, lon1, lat2, lon2) {
-      const toRad = deg => (deg * Math.PI) / 180;
+      const toRad = d => (d * Math.PI) / 180;
       const R = 3958.8;
-      const dLat = toRad(lat2 - lat1);
-      const dLon = toRad(lon2 - lon1);
-      const a =
-        Math.sin(dLat / 2) ** 2 +
-        Math.cos(toRad(lat1)) *
-          Math.cos(toRad(lat2)) *
-          Math.sin(dLon / 2) ** 2;
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
+      const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&","&amp;").replaceAll("<","&lt;")
+        .replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
     }
 
+    function isClosed(b) { return (b.status || "").toLowerCase().includes("closed"); }
+
+    // ── Geocoding ──────────────────────────────────────────────────────────────
     async function reverseGeocode(lat, lng) {
       try {
-        const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
-        const res = await fetch(url, {
-          headers: {
-            Accept: "application/json"
-          }
-        });
-
-        if (!res.ok) throw new Error("Reverse geocode failed");
-
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
+          { headers: { Accept: "application/json" } }
+        );
+        if (!res.ok) throw new Error();
         const data = await res.json();
-
-        const city =
-          data.address?.city ||
-          data.address?.town ||
-          data.address?.village ||
-          data.address?.hamlet ||
-          data.address?.suburb ||
-          data.address?.borough;
-
+        const city = data.address?.city || data.address?.town || data.address?.village ||
+                     data.address?.hamlet || data.address?.suburb || data.address?.borough;
         const stateName = data.address?.state || "";
-
         if (city && stateName) return `${city}, ${stateName}`;
         if (city) return city;
-        return `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
-      } catch {
-        return `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
-      }
+      } catch {}
+      return `${lat.toFixed(3)}, ${lng.toFixed(3)}`;
     }
 
     async function searchPlaces(query) {
-      const params = new URLSearchParams({
-        q: query,
-        limit: "8",
-        lang: "en"
-      });
-
-      if (Number.isFinite(state.userLat) && Number.isFinite(state.userLng)) {
-        params.set("lat", String(state.userLat));
-        params.set("lon", String(state.userLng));
-      }
-
-      const res = await fetch(`${PHOTON_API_BASE}?${params.toString()}`, {
-        headers: {
-          Accept: "application/json"
-        }
-      });
-
-      if (!res.ok) {
-        throw new Error("Place search failed");
-      }
-
+      const params = new URLSearchParams({ q: query, limit: "8", lang: "en" });
+      if (Number.isFinite(state.userLat)) params.set("lat", String(state.userLat));
+      if (Number.isFinite(state.userLng)) params.set("lon", String(state.userLng));
+      const res = await fetch(`${PHOTON_API_BASE}?${params}`, { headers: { Accept: "application/json" } });
+      if (!res.ok) throw new Error("Place search failed");
       const data = await res.json();
       const features = Array.isArray(data.features) ? data.features : [];
-
-      const cleaned = features
-        .map(feature => {
-          const props = feature.properties || {};
-          const coords = feature.geometry?.coordinates || [];
-          const lon = Number(coords[0]);
-          const lat = Number(coords[1]);
-
-          const primary =
-            props.name ||
-            props.city ||
-            props.district ||
-            props.suburb ||
-            props.street ||
-            props.county ||
-            props.state;
-
-          const secondaryParts = [
-            props.city && props.city !== primary ? props.city : "",
-            props.district && props.district !== primary ? props.district : "",
-            props.suburb && props.suburb !== primary ? props.suburb : "",
-            props.state || "",
-            props.country || ""
-          ].filter(Boolean);
-
-          const typeLabel =
-            props.osm_value ||
-            props.type ||
-            "place";
-
-          return {
-            label: primary || "Unnamed place",
-            sublabel: secondaryParts.join(" • "),
-            typeLabel,
-            lat,
-            lng: lon
-          };
-        })
-        .filter(item => item.label && Number.isFinite(item.lat) && Number.isFinite(item.lng));
-
+      const cleaned = features.map(f => {
+        const p = f.properties || {};
+        const [lon, lat] = f.geometry?.coordinates || [];
+        const primary = p.name || p.city || p.district || p.suburb || p.street || p.county || p.state;
+        const sub = [
+          p.city !== primary && p.city, p.district !== primary && p.district,
+          p.suburb !== primary && p.suburb, p.state, p.country
+        ].filter(Boolean).join(" • ");
+        return { label: primary || "Unnamed place", sublabel: sub, typeLabel: p.osm_value || p.type || "place",
+                 lat: Number(lat), lng: Number(lon) };
+      }).filter(i => i.label && Number.isFinite(i.lat) && Number.isFinite(i.lng));
       const seen = new Set();
-      return cleaned.filter(item => {
-        const key = `${item.label}|${item.sublabel}|${item.lat.toFixed(4)}|${item.lng.toFixed(4)}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
+      return cleaned.filter(i => {
+        const k = `${i.label}|${i.sublabel}|${i.lat.toFixed(4)}|${i.lng.toFixed(4)}`;
+        return seen.has(k) ? false : (seen.add(k), true);
       });
     }
 
+    // ── Suggestions ────────────────────────────────────────────────────────────
     function renderSuggestions(items) {
-      if (!items.length) {
-        els.suggestions.innerHTML = "";
-        els.suggestions.classList.add("hidden");
-        return;
-      }
-
-      els.suggestions.innerHTML = items.map((item, index) => `
-        <button class="suggestion-item" type="button" data-index="${index}">
+      if (!items.length) { els.suggestions.innerHTML = ""; els.suggestions.classList.add("hidden"); return; }
+      els.suggestions.innerHTML = items.map((item, i) => `
+        <button class="suggestion-item" type="button" data-index="${i}">
           <span class="suggestion-main">${escapeHtml(item.label)}</span>
           <span class="suggestion-sub">${escapeHtml(item.sublabel || item.typeLabel || "Select this location")}</span>
-        </button>
-      `).join("");
-
+        </button>`).join("");
       els.suggestions.classList.remove("hidden");
     }
 
-    function hideSuggestions() {
-      els.suggestions.classList.add("hidden");
-    }
+    function hideSuggestions() { els.suggestions.classList.add("hidden"); }
 
     async function selectPlace(place) {
-      state.userLat = place.lat;
-      state.userLng = place.lng;
-      state.userLabel = place.sublabel
-        ? `${place.label}, ${place.sublabel.split(" • ")[0]}`
-        : place.label;
-
+      state.userLat = place.lat; state.userLng = place.lng;
+      state.userLabel = place.sublabel ? `${place.label}, ${place.sublabel.split(" • ")[0]}` : place.label;
       els.locationSearch.value = place.label;
-      state.searchResults = [];
-      hideSuggestions();
-      updateClearSearchButton();
+      state.searchResults = []; hideSuggestions(); updateClearSearchButton();
       await loadBreweriesFromCurrentLocation();
     }
 
-    function isClosed(b) {
-      const status = (b.status || "").toLowerCase();
-      return status.includes("closed");
-    }
+    // ── Filter + sort ──────────────────────────────────────────────────────────
+    function applyFilters() {
+      let rows = [...state.breweries];
 
-    function updateMap() {
-      if (!map) return;
+      if (state.hideClosed) rows = rows.filter(b => !isClosed(b));
 
-      breweryMarkers.forEach(marker => map.removeLayer(marker));
-      breweryMarkers = [];
-
+      // Attach distances
       if (state.userLat != null && state.userLng != null) {
-        if (userMarker) {
-          userMarker.setLatLng([state.userLat, state.userLng]);
-        } else {
-          userMarker = L.marker([state.userLat, state.userLng])
-            .addTo(map)
-            .bindPopup("<strong>Selected location</strong>");
+        rows = rows.map(b => {
+          const lat = parseFloat(b.latitude), lng = parseFloat(b.longitude);
+          const dist = (Number.isFinite(lat) && Number.isFinite(lng))
+            ? haversineMiles(state.userLat, state.userLng, lat, lng)
+            : null;
+          return { ...b, distanceMiles: dist };
+        });
+
+        // Radius filter (100 = "Any")
+        if (state.radiusMiles < 100) {
+          rows = rows.filter(b => b.distanceMiles == null || b.distanceMiles <= state.radiusMiles);
         }
       }
 
-      const validBreweries = state.filtered.filter(b => {
-        const lat = parseFloat(b.latitude);
-        const lng = parseFloat(b.longitude);
+      // Sort
+      if (state.sortMode === "distance") {
+        rows.sort((a, b) => {
+          if (a.distanceMiles == null && b.distanceMiles == null) return 0;
+          if (a.distanceMiles == null) return 1;
+          if (b.distanceMiles == null) return -1;
+          return a.distanceMiles - b.distanceMiles;
+        });
+      } else if (state.sortMode === "name") {
+        rows.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+      } else if (state.sortMode === "name-desc") {
+        rows.sort((a, b) => (b.name || "").localeCompare(a.name || ""));
+      }
+
+      state.filtered = rows;
+      render();
+      updateMap();
+    }
+
+    // ── Render ─────────────────────────────────────────────────────────────────
+    function buildCardHTML(b, showFavBtn = true) {
+      const address = getAddress(b);
+      const phone = formatPhone(b.phone);
+      const callLink = phoneHref(b.phone);
+      const site = cleanUrl(b.website_url);
+      const mapsLink = getMapsLink(b);
+      const untappdLink = getUntappdSearchLink(b);
+      const isFav = state.favorites.has(b.id);
+
+      const distanceText = b.distanceMiles == null ? ""
+        : `${b.distanceMiles < 10 ? b.distanceMiles.toFixed(1) : Math.round(b.distanceMiles)} mi away`;
+
+      const websiteBtn = site
+        ? `<a class="action" href="${site}" target="_blank" rel="noopener noreferrer">🌐 Website</a>` : "";
+      const callBtn = callLink
+        ? `<a class="action call" href="${callLink}">📞 Call</a>`
+        : `<span class="action" style="opacity:.55; cursor:default;">📞 No phone</span>`;
+      const favBtn = showFavBtn
+        ? `<button class="fav-btn ${isFav ? "active" : ""}" data-id="${escapeHtml(b.id)}" title="${isFav ? "Remove from favorites" : "Add to favorites"}">${isFav ? "⭐" : "☆"}</button>`
+        : "";
+
+      return `
+        <article class="card ${isFav ? "is-favorite" : ""}">
+          <div class="card-inner">
+            <div class="card-top">
+              <div class="card-title-wrap">
+                <h4>${escapeHtml(safeText(b.name))}</h4>
+                <div class="badges">
+                  <div class="badge type">🍻 ${escapeHtml(formatType(b.brewery_type))}</div>
+                  ${distanceText ? `<div class="badge distance">📍 ${escapeHtml(distanceText)}</div>` : ""}
+                </div>
+              </div>
+              ${favBtn}
+            </div>
+            <div class="meta">
+              <div class="meta-row">
+                <div class="icon">📍</div>
+                <div class="value ${address ? "" : "muted"}">${escapeHtml(safeText(address))}</div>
+              </div>
+              <div class="meta-row">
+                <div class="icon">🏙️</div>
+                <div class="value">${escapeHtml(safeText([b.city, b.state].filter(Boolean).join(", ")))}</div>
+              </div>
+              <div class="meta-row">
+                <div class="icon">📞</div>
+                <div class="value ${phone ? "" : "muted"}">${escapeHtml(safeText(phone))}</div>
+              </div>
+            </div>
+            <div class="actions">
+              ${callBtn}
+              <a class="action map" href="${mapsLink}" target="_blank" rel="noopener noreferrer">🗺️ Google Maps</a>
+              <a class="action untappd" href="${untappdLink}" target="_blank" rel="noopener noreferrer">🍺 Untappd</a>
+              ${websiteBtn}
+            </div>
+          </div>
+        </article>`;
+    }
+
+    function render() {
+      els.locationLine.textContent = `Current area: ${state.userLabel}`;
+
+      // Update tab counts
+      els.nearbyCount.textContent = state.filtered.length;
+      els.favsCount.textContent = state.favorites.size;
+
+      // ── Nearby pane ──
+      const hasRows = state.filtered.length > 0;
+      els.results.classList.toggle("hidden", !hasRows);
+      els.emptyState.classList.toggle("hidden", hasRows || state.loading);
+
+      if (hasRows) {
+        els.results.innerHTML = state.filtered.map(b => buildCardHTML(b)).join("");
+      }
+
+      // ── Favs pane ──
+      const favBreweries = state.breweries.filter(b => state.favorites.has(b.id));
+
+      if (state.favorites.size === 0) {
+        els.favsResults.innerHTML = `
+          <div class="favs-empty">
+            <div class="favs-empty-icon">⭐</div>
+            <strong>No favorites yet</strong>
+            <p>Tap the ☆ on any brewery to save it here.</p>
+          </div>`;
+      } else if (favBreweries.length === 0) {
+        // Favorites saved but not in current search area
+        els.favsResults.innerHTML = `
+          <div class="favs-empty">
+            <div class="favs-empty-icon">📍</div>
+            <strong>Favorites not in this area</strong>
+            <p>Your ${state.favorites.size} favorite${state.favorites.size !== 1 ? "s" : ""} are outside the current search area.</p>
+          </div>`;
+      } else {
+        els.favsResults.innerHTML = favBreweries.map(b => buildCardHTML(b)).join("");
+      }
+    }
+
+    function switchTab(tab) {
+      state.activeTab = tab;
+      els.tabNearby.classList.toggle("active", tab === "nearby");
+      els.tabFavs.classList.toggle("active", tab === "favs");
+      els.nearbyPane.classList.toggle("hidden", tab !== "nearby");
+      els.favsPane.classList.toggle("hidden", tab !== "favs");
+    }
+
+    // ── Map update ─────────────────────────────────────────────────────────────
+    function updateMap() {
+      if (!map) return;
+      breweryMarkers.forEach(m => map.removeLayer(m));
+      breweryMarkers = [];
+
+      if (state.userLat != null && state.userLng != null) {
+        if (userMarker) { userMarker.setLatLng([state.userLat, state.userLng]); }
+        else { userMarker = L.marker([state.userLat, state.userLng]).addTo(map).bindPopup("<strong>Selected location</strong>"); }
+      }
+
+      const valid = state.filtered.filter(b => {
+        const lat = parseFloat(b.latitude), lng = parseFloat(b.longitude);
         return Number.isFinite(lat) && Number.isFinite(lng);
       });
 
-      validBreweries.forEach(b => {
-        const lat = parseFloat(b.latitude);
-        const lng = parseFloat(b.longitude);
-
+      valid.forEach(b => {
+        const lat = parseFloat(b.latitude), lng = parseFloat(b.longitude);
         const marker = L.marker([lat, lng]).addTo(map);
         marker.bindPopup(`
           <strong>${escapeHtml(b.name || "Brewery")}</strong><br>
@@ -1028,156 +933,21 @@
           &nbsp;|&nbsp;
           <a href="${getUntappdSearchLink(b)}" target="_blank" rel="noopener noreferrer">Untappd</a>
         `);
-
         breweryMarkers.push(marker);
       });
 
       const bounds = [];
+      if (state.userLat != null) bounds.push([state.userLat, state.userLng]);
+      valid.forEach(b => bounds.push([parseFloat(b.latitude), parseFloat(b.longitude)]));
 
-      if (state.userLat != null && state.userLng != null) {
-        bounds.push([state.userLat, state.userLng]);
-      }
-
-      validBreweries.forEach(b => {
-        bounds.push([parseFloat(b.latitude), parseFloat(b.longitude)]);
-      });
-
-      if (bounds.length === 1) {
-        map.setView(bounds[0], 12);
-      } else if (bounds.length > 1) {
-        map.fitBounds(bounds, { padding: [40, 40] });
-      }
+      if (bounds.length === 1) map.setView(bounds[0], 12);
+      else if (bounds.length > 1) map.fitBounds(bounds, { padding: [40, 40] });
     }
 
-    function applyFilters() {
-      let rows = [...state.breweries];
-
-      if (state.hideClosed) {
-        rows = rows.filter(b => !isClosed(b));
-      }
-
-      if (state.userLat != null && state.userLng != null) {
-        rows = rows
-          .map(b => {
-            const lat = parseFloat(b.latitude);
-            const lng = parseFloat(b.longitude);
-
-            if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-              return { ...b, distanceMiles: null };
-            }
-
-            return {
-              ...b,
-              distanceMiles: haversineMiles(state.userLat, state.userLng, lat, lng)
-            };
-          })
-          .sort((a, b) => {
-            if (a.distanceMiles == null && b.distanceMiles == null) return 0;
-            if (a.distanceMiles == null) return 1;
-            if (b.distanceMiles == null) return -1;
-            return a.distanceMiles - b.distanceMiles;
-          });
-      }
-
-      state.filtered = rows;
-      render();
-      updateMap();
-    }
-
-    function render() {
-      els.locationLine.textContent = `Current area: ${state.userLabel}`;
-
-      const count = state.filtered.length;
-      const hasRows = count > 0;
-
-      els.results.classList.toggle("hidden", !hasRows);
-      els.emptyState.classList.toggle("hidden", hasRows || state.loading);
-
-      if (!hasRows) {
-        els.results.innerHTML = "";
-        return;
-      }
-
-      els.results.innerHTML = state.filtered.map(b => {
-        const address = getAddress(b);
-        const phone = formatPhone(b.phone);
-        const callLink = phoneHref(b.phone);
-        const site = cleanUrl(b.website_url);
-        const mapsLink = getMapsLink(b);
-        const untappdLink = getUntappdSearchLink(b);
-
-        const distanceText =
-          b.distanceMiles == null
-            ? ""
-            : `${b.distanceMiles < 10 ? b.distanceMiles.toFixed(1) : Math.round(b.distanceMiles)} mi away`;
-
-        const websiteBtn = site
-          ? `<a class="action" href="${site}" target="_blank" rel="noopener noreferrer">🌐 Website</a>`
-          : "";
-
-        const callBtn = callLink
-          ? `<a class="action call" href="${callLink}">📞 Call</a>`
-          : `<span class="action" style="opacity:.55; cursor:default;">📞 No phone</span>`;
-
-        return `
-          <article class="card">
-            <div class="card-inner">
-              <div class="card-top">
-                <div class="card-title-wrap">
-                  <h4>${escapeHtml(safeText(b.name))}</h4>
-                  <div class="badges">
-                    <div class="badge type">🍻 ${escapeHtml(formatType(b.brewery_type))}</div>
-                    ${distanceText ? `<div class="badge distance">📍 ${escapeHtml(distanceText)}</div>` : ""}
-                  </div>
-                </div>
-              </div>
-
-              <div class="meta">
-                <div class="meta-row">
-                  <div class="icon">📍</div>
-                  <div class="value ${address ? "" : "muted"}">${escapeHtml(safeText(address))}</div>
-                </div>
-
-                <div class="meta-row">
-                  <div class="icon">🏙️</div>
-                  <div class="value">${escapeHtml(safeText([b.city, b.state].filter(Boolean).join(", ")))}</div>
-                </div>
-
-                <div class="meta-row">
-                  <div class="icon">📞</div>
-                  <div class="value ${phone ? "" : "muted"}">${escapeHtml(safeText(phone))}</div>
-                </div>
-              </div>
-
-              <div class="actions">
-                ${callBtn}
-                <a class="action map" href="${mapsLink}" target="_blank" rel="noopener noreferrer">🗺️ Google Maps</a>
-                <a class="action untappd" href="${untappdLink}" target="_blank" rel="noopener noreferrer">🍺 Untappd</a>
-                ${websiteBtn}
-              </div>
-            </div>
-          </article>
-        `;
-      }).join("");
-    }
-
-    function escapeHtml(value) {
-      return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
+    // ── API ────────────────────────────────────────────────────────────────────
     async function fetchBreweriesByLocation(lat, lng) {
-      const url = `${BREWERY_API_BASE}?by_dist=${lat},${lng}&per_page=50`;
-      const res = await fetch(url);
-
-      if (!res.ok) {
-        throw new Error("Could not load breweries.");
-      }
-
+      const res = await fetch(`${BREWERY_API_BASE}?by_dist=${lat},${lng}&per_page=50`);
+      if (!res.ok) throw new Error("Could not load breweries.");
       return res.json();
     }
 
@@ -1186,136 +956,113 @@
         setError("Location not set yet. Use your location or search a city.");
         return;
       }
-
-      setError("");
-      setLoading(true, "Finding breweries near this location...");
+      if (state.fetchInFlight) return;
+      state.fetchInFlight = true;
+      setError(""); setLoading(true, "Finding breweries near this location...");
       els.statusPill.textContent = "Loading breweries";
-
       try {
         const rows = await fetchBreweriesByLocation(state.userLat, state.userLng);
         state.breweries = Array.isArray(rows) ? rows : [];
         applyFilters();
         els.statusPill.textContent = `${state.filtered.length} breweries loaded`;
       } catch (err) {
-        setError(err.message || "Something went wrong while loading breweries.");
+        setError(err.message || "Something went wrong.");
         els.statusPill.textContent = "Load failed";
       } finally {
-        setLoading(false);
+        setLoading(false); state.fetchInFlight = false;
       }
     }
 
     async function locateUser() {
-      if (!navigator.geolocation) {
-        setError("Geolocation is not supported on this device.");
-        return;
-      }
-
-      setError("");
-      setLoading(true, "Getting your location...");
+      if (!navigator.geolocation) { setError("Geolocation is not supported on this device."); return; }
+      setError(""); setLoading(true, "Getting your location...");
       els.statusPill.textContent = "Getting location";
-
       navigator.geolocation.getCurrentPosition(
         async position => {
           state.userLat = position.coords.latitude;
           state.userLng = position.coords.longitude;
           state.userLabel = await reverseGeocode(state.userLat, state.userLng);
           els.locationSearch.value = state.userLabel;
-          hideSuggestions();
-          updateClearSearchButton();
-          setLoading(false);
+          hideSuggestions(); updateClearSearchButton(); setLoading(false);
           await loadBreweriesFromCurrentLocation();
         },
         error => {
-          setLoading(false);
-          els.statusPill.textContent = "Location blocked";
-          const messageMap = {
-            1: "Location access was denied.",
-            2: "Your location is unavailable.",
-            3: "Location request timed out."
-          };
-          setError(messageMap[error.code] || "Could not get your location.");
+          setLoading(false); els.statusPill.textContent = "Location blocked";
+          setError({ 1: "Location access was denied.", 2: "Your location is unavailable.",
+                     3: "Location request timed out." }[error.code] || "Could not get your location.");
         },
-        {
-          enableHighAccuracy: true,
-          timeout: 12000,
-          maximumAge: 300000
-        }
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 300000 }
       );
     }
 
-    els.hideClosedToggle.addEventListener("change", e => {
-      state.hideClosed = e.target.checked;
-      applyFilters();
-    });
-
+    // ── Event listeners ────────────────────────────────────────────────────────
+    els.hideClosedToggle.addEventListener("change", e => { state.hideClosed = e.target.checked; applyFilters(); });
     els.locateBtn.addEventListener("click", locateUser);
     els.refreshBtn.addEventListener("click", loadBreweriesFromCurrentLocation);
 
+    els.radiusSlider.addEventListener("input", () => {
+      state.radiusMiles = Number(els.radiusSlider.value);
+      updateRadiusSlider();
+      applyFilters();
+    });
+
+    els.sortSelect.addEventListener("change", () => {
+      state.sortMode = els.sortSelect.value;
+      applyFilters();
+    });
+
+    // Tab switching
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+    });
+
+    // Favorite toggle via event delegation
+    document.addEventListener("click", e => {
+      const favBtn = e.target.closest(".fav-btn");
+      if (favBtn) { toggleFavorite(favBtn.dataset.id); return; }
+      if (!e.target.closest(".search-wrap")) hideSuggestions();
+    });
+
     els.locationSearch.addEventListener("input", () => {
       const value = els.locationSearch.value.trim();
-      updateClearSearchButton();
-
-      clearTimeout(searchDebounce);
-
-      if (value.length < 2) {
-        state.searchResults = [];
-        renderSuggestions([]);
-        return;
-      }
-
+      updateClearSearchButton(); clearTimeout(searchDebounce);
+      if (value.length < 2) { state.searchResults = []; renderSuggestions([]); return; }
       searchDebounce = setTimeout(async () => {
         try {
           els.statusPill.textContent = "Searching places";
           const places = await searchPlaces(value);
-          state.searchResults = places;
-          renderSuggestions(places);
+          state.searchResults = places; renderSuggestions(places);
           els.statusPill.textContent = places.length ? "Select a location" : "No matches";
         } catch (err) {
-          console.error(err);
-          state.searchResults = [];
-          renderSuggestions([]);
+          console.error(err); state.searchResults = []; renderSuggestions([]);
           els.statusPill.textContent = "Search failed";
         }
       }, 250);
     });
 
     els.locationSearch.addEventListener("keydown", e => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        if (state.searchResults.length) {
-          selectPlace(state.searchResults[0]);
-        }
-      }
+      if (e.key === "Enter") { e.preventDefault(); if (state.searchResults.length) selectPlace(state.searchResults[0]); }
     });
 
     els.clearSearchBtn.addEventListener("click", () => {
-      els.locationSearch.value = "";
-      state.searchResults = [];
-      hideSuggestions();
-      updateClearSearchButton();
-      els.locationSearch.focus();
+      els.locationSearch.value = ""; state.searchResults = [];
+      hideSuggestions(); updateClearSearchButton(); els.locationSearch.focus();
     });
 
     els.suggestions.addEventListener("mousedown", e => {
-      const button = e.target.closest(".suggestion-item");
-      if (!button) return;
-
+      const btn = e.target.closest(".suggestion-item");
+      if (!btn) return;
       e.preventDefault();
-
-      const index = Number(button.dataset.index);
-      const place = state.searchResults[index];
+      const place = state.searchResults[Number(btn.dataset.index)];
       if (place) selectPlace(place);
     });
 
-    document.addEventListener("click", e => {
-      if (!e.target.closest(".search-wrap")) {
-        hideSuggestions();
-      }
-    });
-
+    // ── Init ───────────────────────────────────────────────────────────────────
     initMap();
     updateClearSearchButton();
+    updateRadiusSlider();
     locateUser();
   </script>
+
 </body>
 </html>
